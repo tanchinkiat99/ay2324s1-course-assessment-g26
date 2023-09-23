@@ -26,7 +26,7 @@ const Nav = () => {
       <div className="sm:flex hidden">
         {session?.user ? (
           <div className="flex gap-3">
-            <Link href="/create-question" className="black_btn">Create Question</Link>
+            <Link href="/questions" className="black_btn">Create Question</Link>
             <button type="button" onClick={signOut} className="outline_btn">Sign Out</button>
             <Link href="/profile">
               <Image src={session?.user.image} width={50} height={50} className="rounded-full"/>

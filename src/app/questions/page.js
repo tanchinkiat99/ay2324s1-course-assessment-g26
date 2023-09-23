@@ -1,10 +1,10 @@
-import React from 'react'
+import React from 'react';
 
 // /questions
 const page = () => {
   return (
     <div>Questions</div>
-  )
+  );
 }
 
-export default page
+export default page;

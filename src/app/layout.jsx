@@ -1,4 +1,6 @@
 import '@styles/globals.css';
+import Nav from '@components/Nav';
+import Provider from '@components/Provider';
 
 export const metadata = {
   title: 'PeerPrep',
@@ -10,6 +12,7 @@ const RootLayout = ({ children }) => {
     <html lang="en">
       <body>
         <main>
+          <Nav />
           {children}
         </main>
       </body>

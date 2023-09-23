@@ -11,7 +11,9 @@ const handler = NextAuth({
     })
   ],
   async session({ session }) {
-
+    // TODO: find user from SQL database where email == user.session.email
+    // TODO: Set session.user.id to the id string of the user retrieved
+    return session
   },
 
   async signIn({ profile }) {

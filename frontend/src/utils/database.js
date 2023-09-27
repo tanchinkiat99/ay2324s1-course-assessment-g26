@@ -1,3 +1,4 @@
+// THIS IS ONLY FOR SERVERLESS ENDPOINTS USING NEXTJS
 // Util to check if both SQL and MongoDB servers are connected
 // Currently, only checks MongoDB question database
 
@@ -12,14 +13,14 @@ export const connectToDB = async () => {
 
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      dbName: "peerprep",
+      dbName: 'peerprep',
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    })
+    });
 
     isConnected = true;
-    console.log("MongoDB is connected")
+    console.log('MongoDB is connected');
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-}
+};

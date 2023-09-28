@@ -25,57 +25,98 @@ app.get('/hello', (req, res) => {
   res.json({ message: 'hello' });
 });
 
+// rabbitmq to be global variables
+let channel, connection;
+
+connect();
+// Connect to rabbitmq
+async function connect() {
+  try {
+    connection = await amqp.connect(RABBITMQ_URL);
+    channel = await connection.createChannel();
+
+    // Creates queues for matches and notifications
+    await channel.assertQueue('matchQueue', { durable: false });
+    await channel.assertQueue('notificationQueue', { durable: false });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 // Maintain a map of user ID to socket
 const clientToSocketId = {};
 
 io.on('connection', (socket) => {
-  socket.on('test_connection', (data) => {
-    console.log(data.message, `Socket ID: ${socket.id}`);
-    socket.emit('test_connection_success', {
-      message: 'Connection successful',
-      success: true,
-    });
-  });
-
   socket.on('find_match', (data) => {
+    // Store socket id of each user
     clientToSocketId[data.user_id] = socket.id;
     console.log(
-      data.message,
-      `Socket ID: ${socket.id}`,
+      'Request to find match:\n',
+      `Socket ID: ${socket.id}\n`,
       `User ID: ${data.user_id}`
     );
+
+    // Keep track of matched status
+    let isMatched = false;
+
+    // Add user to match queue
     addToMatchQueue(data.user_id);
 
-    // setInterval(async () => {
-    //   try {
-    //     const connection = await amqp.connect(RABBITMQ_URL);
-    //     const channel = await connection.createChannel();
+    // Emit a response event to notify user
+    socket.emit('test_connection_success', {
+      message: `Connected to matching service at port ${MATCHING_SERVER_PORT}`,
+    });
 
-    //     await channel.assertQueue('notificationsQueue', { durable: false });
+    // Check for a successful match in the notifications queue
+    const checkMatchInterval = setInterval(async () => {
+      channel.consume('notificationQueue', (msg) => {
+        const msgObj = JSON.parse(msg.content.toString());
+        if (msgObj.user_id === data.user_id) {
+          console.log('FOUND A MATCH FOR USER: ', data.user_id, msgObj.room_id);
+          channel.ack(msg);
+          socket.join(msgObj.room_id);
+          socket.emit('match_found', {
+            message: `Match found, joining room ${msgObj.room_id}`,
+          });
+          isMatched = true;
+          clearInterval(checkMatchInterval);
+        }
+      });
+    }, 5000);
 
-    //     channel.consume('notificationsQueue', (msg) => {
-    //       const msgObj = JSON.parse(msg.content.toString());
-    //       if (msgObj.user_id === data.user_id) {
-    //         socket.emit('found_match', {
-    //           room_id: msgObj.room_id,
-    //         });
-    //         channel.ack(msg);
-    //       }
-    //     });
-    //   } catch (err) {
-    //     console.error(err);
-    //   }
-    // }, 5000);
+    // Set timeout for 30 seconds to disconnect user
+    setTimeout(() => {
+      isMatched || socket.disconnect();
+    }, 30000);
   });
 });
 
+// Check notifications queue for a successful match
+async function checkForSuccessfulMatch(userId) {
+  try {
+    let roomId = null;
+    await channel.consume('notificationQueue', (msg) => {
+      const msgObj = JSON.parse(msg.content.toString());
+      console.log('checking for user: ', userId);
+      if (msgObj.user_id === userId) {
+        console.log('FOUND A MATCH FOR USER: ', userId, msgObj.room_id);
+        channel.ack(msg);
+        // Resolve the promise with the room id if found
+        roomId = msgObj.room_id;
+      }
+    });
+
+    console.log('THIS IS THE RETURN VALUE: ', roomId);
+    // Return room ID
+    return roomId;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// Adds user (user id) to matching queue
 async function addToMatchQueue(message) {
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
-    const channel = await connection.createChannel();
-
-    await channel.assertQueue('matchQueue', { durable: false });
-
     // Add the current user ID to the queue
     channel.sendToQueue('matchQueue', Buffer.from(message));
   } catch (error) {
@@ -83,17 +124,15 @@ async function addToMatchQueue(message) {
   }
 }
 
+// Matches first 2 users in queue if queue length >= 2
 async function matchUsersInQueue() {
   try {
-    const connection = await amqp.connect(RABBITMQ_URL);
-    const channel = await connection.createChannel();
-
-    await channel.assertQueue('matchQueue', { durable: false });
     // Get the current number of user IDs in the queue
-    const messageCount = (await channel.checkQueue('matchQueue')).messageCount;
+    const matchQueueStats = await channel.checkQueue('matchQueue');
 
     // If there are more than 2 users in queue, match 2 users together
-    if (messageCount >= 2) {
+    if (matchQueueStats.messageCount >= 2) {
+      console.log('Matching users');
       // Get first user
       const user1 = await channel.get('matchQueue');
       if (user1 !== null) {
@@ -109,7 +148,6 @@ async function matchUsersInQueue() {
       const user2Id = user2.content.toString();
 
       // Create a socket room and add to notifications queue
-      await channel.assertQueue('notificationsQueue', { durable: false });
       const newRoomId = user1Id + user2Id;
       const newNotification1 = {
         user_id: user1Id,
@@ -119,13 +157,24 @@ async function matchUsersInQueue() {
         user_id: user2Id,
         room_id: newRoomId,
       };
-      channel.sendToQueue(
-        'notificationsQueue',
+      // Send one notification for each user
+      await channel.sendToQueue(
+        'notificationQueue',
         Buffer.from(JSON.stringify(newNotification1))
       );
-      channel.sendToQueue(
-        'notificationsQueue',
+      await channel.sendToQueue(
+        'notificationQueue',
         Buffer.from(JSON.stringify(newNotification2))
+      );
+      console.log(newNotification1);
+      console.log(newNotification2);
+
+      console.log(
+        'Matched users:\n',
+        'User 1: ',
+        user1Id,
+        '\nUser 2: ',
+        user2Id
       );
     }
   } catch (error) {
@@ -133,9 +182,10 @@ async function matchUsersInQueue() {
   }
 }
 
-// setInterval(async () => {
-//   matchUsersInQueue();
-// }, 5000);
+// Check for valid matches every 5 seconds
+setInterval(async () => {
+  matchUsersInQueue();
+}, 5000);
 
 server.listen(MATCHING_SERVER_PORT, () => {
   console.log(`Matching server listening on port ${MATCHING_SERVER_PORT}`);

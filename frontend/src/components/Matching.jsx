@@ -7,34 +7,41 @@ const Matching = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isMatched, setIsMatched] = useState(false);
   const [countdown, setCountdown] = useState(30);
+  const [connect, setConnect] = useState(false);
 
   // TODO: get user id from the actual user id
   const [userId, setUserId] = useState('');
 
   useEffect(() => {
-    const socket = io('http://localhost:5000');
-    socket.emit('find_match', {
-      message: `Request to find match from user: ${userId}`,
-      user_id: userId,
-    });
+    if (connect) {
+      const socket = io('http://localhost:5000');
+      socket.emit('find_match', {
+        user_id: userId,
+      });
 
-    socket.on('test_connection_success', (data) => {
-      console.log(data.message);
-      if (data.success) {
-        setIsConnected(true);
-      }
-    });
+      socket.on('test_connection_success', (data) => {
+        console.log(data.message);
+        if (data) {
+          setIsConnected(true);
+        }
+      });
 
-    socket.on('found_match', (data) => {
-      console.log('success', data.room_id);
-    });
+      socket.on('match_found', (data) => {
+        console.log(data.message);
+      });
 
-    return () => {
-      socket.off('find_match');
-      socket.off('test_connection_success');
-      socket.off('found_match');
-    };
-  }, []);
+      socket.on('disconnect', () => {
+        console.log('Disconnected');
+        setIsConnected(false);
+      });
+
+      return () => {
+        socket.off('find_match');
+        socket.off('test_connection_success');
+        socket.off('match_found');
+      };
+    }
+  }, [connect]);
 
   return (
     <div>
@@ -47,9 +54,12 @@ const Matching = () => {
         placeholder="Enter your user id here"
         onChange={(e) => {
           setIsConnected(false);
+          setConnect(false);
           setUserId(e.target.value);
         }}
       />
+      <br />
+      <button onClick={() => setConnect(true)}>Click here to connect</button>
       <br />
       <div
         style={

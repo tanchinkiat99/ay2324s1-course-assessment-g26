@@ -1,4 +1,5 @@
 import QuestionsList from "@components/QuestionsList";
+import Matching from "@components/Matching";
 
 const Home = () => {
   return (
@@ -10,6 +11,7 @@ const Home = () => {
       </h1>
       <p className="desc text-center">Browse the questions here and get matched</p>
       <QuestionsList />
+      <Matching />
     </section>
   );
 }

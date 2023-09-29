@@ -6,7 +6,9 @@ import QuestionForm from '@components/QuestionForm';
 
 const EditQuestion = () => {
   const router = useRouter();
+  // Get question ID from query params
   const searchParams = useSearchParams();
+  const questionId = searchParams.get('id');
   // Submitting state will change the text on the button
   const [submitting, setSubmitting] = useState(false);
   const [post, setPost] = useState({
@@ -18,16 +20,17 @@ const EditQuestion = () => {
   });
 
   useEffect(() => {
+    // Fill in form with question details
     const getQuestionDetails = async () => {
       const response = await fetch(
         `http://localhost:5000/questions/${questionId}`
       );
       const data = await response.json();
       setPost({
-        title: quesiton.title,
-        description: question.description,
-        categories: question.categories,
-        complexity: question.complexity,
+        title: data.title,
+        description: data.description,
+        categories: data.categories,
+        complexity: data.complexity,
       });
     };
 

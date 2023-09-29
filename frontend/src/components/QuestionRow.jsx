@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
-const QuestionRow = ({ question, handleDelete }) => {
-  const [showEditForm, setShowEditForm] = useState(false);
-  const handleEditClick = () => {
-    setShowEditForm(!showEditForm);
-  };
+const QuestionRow = ({ question, handleEdit, handleDelete }) => {
   return (
     <tr>
       <td>
@@ -15,8 +11,20 @@ const QuestionRow = ({ question, handleDelete }) => {
         <p>{question.complexity}</p>
       </td>
       <td>
-        <button onClick={handleEditClick}>Edit</button>
-        <button onClick={() => handleDelete(question._id)}>Delete</button>
+        <div>
+          <p
+            className="font-inter text-sm cursor-pointer green_gradient"
+            onClick={() => handleEdit(question._id)}
+          >
+            Edit
+          </p>
+          <p
+            className="font-inter text-sm cursor-pointer orange_gradient"
+            onClick={() => handleDelete(question._id)}
+          >
+            Delete
+          </p>
+        </div>
       </td>
     </tr>
   );

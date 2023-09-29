@@ -1,7 +1,9 @@
-const QuestionsList = () => {
+const QuestionsList = ({ data }) => {
   return (
-    <div>QuestionsList</div>
+    <div>
+      <h1>All Questions</h1>
+    </div>
   );
-}
+};
 
 export default QuestionsList;

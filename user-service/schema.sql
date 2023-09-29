@@ -2,9 +2,14 @@ CREATE DATABASE user;
 USE user;
 
 CREATE TABLE username (
-    username VARCHAR(45) NOT NULL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL PRIMARY KEY,
+    username VARCHAR(45) NOT NULL,
     password VARCHAR(20) NOT NULL
 );
 
-INSERT INTO  username(username, password) VALUES
-("test", "test");
+CREATE TABLE history_bank (
+    email VARCHAR(45) NOT NULL,
+    question_id INT(255),
+    PRIMARY KEY (email, question_id),
+    FOREIGN KEY (email) REFERENCES username(email)
+);

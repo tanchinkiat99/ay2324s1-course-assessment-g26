@@ -55,5 +55,6 @@ export const deleteQuestion = async (req, res) => {
     res.status(200).json({ message: 'Question deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
+    console.log(error);
   }
 };

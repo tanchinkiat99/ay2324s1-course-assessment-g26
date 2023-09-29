@@ -1,8 +1,27 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import QuestionRow from './QuestionRow';
 
 const QuestionTable = ({ data }) => {
+  const router = useRouter();
+  const handleDelete = async (id) => {
+    console.log(id);
+    try {
+      const response = await fetch(`http://localhost:5000/questions/${id}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        // Trigger refetch
+        setShouldRefetch(true);
+      } else {
+        console.error('Failed to delete question');
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+    }
+  };
+
   return (
     <section id="question-list">
       <table className="w-full mt-5">
@@ -15,7 +34,7 @@ const QuestionTable = ({ data }) => {
         </thead>
         <tbody>
           {data.map((question) => (
-            <QuestionRow question={question} />
+            <QuestionRow question={question} handleDelete={handleDelete} />
           ))}
         </tbody>
       </table>
@@ -26,6 +45,7 @@ const QuestionTable = ({ data }) => {
 const QuestionsList = () => {
   const [searchText, setSearchText] = useState('');
   const [questions, setQuestions] = useState([]);
+  const [shouldRefetch, setShouldRefetch] = useState(true); // Refetch trigger
   const handleSearchChange = (e) => {};
 
   // Get all questions as soon as page loads
@@ -36,7 +56,12 @@ const QuestionsList = () => {
       setQuestions(data);
     };
     fetchQuestions();
-  }, []);
+    // Reset refetch trigger
+    if (shouldRefetch) {
+      fetchQuestions();
+      setShouldRefetch(false);
+    }
+  }, [shouldRefetch]);
 
   return (
     <section className="feed">
@@ -50,7 +75,7 @@ const QuestionsList = () => {
           className="search_input peer mt-10"
         />
       </form>
-      <QuestionTable data={questions} handleQuestionClick={() => {}} />
+      <QuestionTable data={questions} />
     </section>
   );
 };

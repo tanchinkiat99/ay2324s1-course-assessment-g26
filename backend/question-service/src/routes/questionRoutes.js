@@ -12,7 +12,7 @@ const router = express.Router();
 router.post('/new', createQuestion);
 router.get('/', getAllQuestions);
 router.get('/:id', getQuestionById);
-router.put('/:id', updateQuestion);
+router.patch('/:id', updateQuestion);
 router.delete('/:id', deleteQuestion);
 
 export default router;

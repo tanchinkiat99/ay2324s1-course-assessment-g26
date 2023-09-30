@@ -28,6 +28,16 @@ select {
   margin-bottom: 1rem;
 }
 
+textarea {
+  width: 60%;
+  min-height: 100px;
+}
+
+/* Preserve whitespaces and newlines */
+textarea, #detail-description {
+  white-space: pre-wrap;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

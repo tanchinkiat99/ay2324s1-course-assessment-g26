@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       addQuestionToLocalStorage(question);
       displayQuestions();
+      questionForm.reset()
     }
   });
 
@@ -103,12 +104,12 @@ document.getElementById('edit-form').addEventListener('submit', function(e) {
     complexity: complexity
   };
 
-  if (isDuplicateQuestion(updatedQuestion)) {
+  if (isDuplicateQuestion(updatedQuestion, id)) {
     alert("This question already exists");
   } else {
     updateQuestionInLocalStorage(updatedQuestion);
-    displayQuestions();
-    hideQuestionDetails();
+    hideEditForm();
+    viewQuestion(id)
   }
 });
 
@@ -135,9 +136,12 @@ function deleteQuestion(id) {
   displayQuestions(); // refresh the list after deletion
 }
 
-function isDuplicateQuestion(inputQuestion) {
+function isDuplicateQuestion(inputQuestion, updateId= null) {
   let questions = JSON.parse(localStorage.getItem("questions")) || [];
   for (let question of questions) {
+    if (question.id === updateId) {
+      continue; // Skip checking against the original question's title
+    }
     if (
       // Checking if input question title and description already exists
       question.title === inputQuestion.title ||

@@ -8,8 +8,10 @@ const Matching = () => {
   const [isMatched, setIsMatched] = useState(false);
   const [countdown, setCountdown] = useState(30);
   const [connect, setConnect] = useState(false);
+  const [otherUser, setOtherUser] = useState('');
+  const [roomId, setRoomId] = useState('');
 
-  // TODO: get user id from the actual user id
+  // TODO: get user id from the actual user id instead of input
   const [userId, setUserId] = useState('');
 
   useEffect(() => {
@@ -19,7 +21,7 @@ const Matching = () => {
         user_id: userId,
       });
 
-      socket.on('test_connection_success', (data) => {
+      socket.on('finding_match', (data) => {
         console.log(data.message);
         if (data) {
           setIsConnected(true);
@@ -28,17 +30,26 @@ const Matching = () => {
 
       socket.on('match_found', (data) => {
         console.log(data.message);
+        setIsMatched(true);
+        setOtherUser(data.other_user_id);
+        setRoomId(data.room_id);
       });
 
       socket.on('disconnect', () => {
         console.log('Disconnected');
+        setIsMatched(false);
         setIsConnected(false);
+      });
+
+      socket.on('user_joined_room', (data) => {
+        console.log(data.message);
       });
 
       return () => {
         socket.off('find_match');
-        socket.off('test_connection_success');
+        socket.off('finding_match');
         socket.off('match_found');
+        socket.off('user_joined_room');
       };
     }
   }, [connect]);
@@ -59,23 +70,50 @@ const Matching = () => {
         }}
       />
       <br />
-      <button onClick={() => setConnect(true)}>Click here to connect</button>
+      <button
+        onClick={() => setConnect(true)}
+        style={{ width: '20%', borderWidth: 1, borderColor: 'black' }}
+      >
+        Click here to find a match
+      </button>
       <br />
       <div
         style={
           isConnected
-            ? { backgroundColor: 'green' }
-            : { backgroundColor: 'red' }
+            ? {
+                backgroundColor: 'green',
+                width: '20%',
+                borderWidth: 1,
+                borderColor: 'black',
+              }
+            : {
+                backgroundColor: 'red',
+                width: '20%',
+                borderWidth: 1,
+                borderColor: 'black',
+              }
         }
       >
-        {isConnected ? 'Connected to matching service' : 'Not connected'}
+        {isConnected ? 'Finding a match' : 'Disconnected'}
       </div>
       <div
         style={
-          isMatched ? { backgroundColor: 'green' } : { backgroundColor: 'red' }
+          isMatched
+            ? {
+                backgroundColor: 'green',
+                width: '20%',
+                borderWidth: 1,
+                borderColor: 'black',
+              }
+            : {
+                backgroundColor: 'red',
+                width: '20%',
+                borderWidth: 1,
+                borderColor: 'black',
+              }
         }
       >
-        {isMatched ? 'Matched' : 'Not matched'}
+        {isMatched ? 'Matched with: ' + otherUser : 'Not matched'}
       </div>
       <div>{countdown}</div>
     </div>

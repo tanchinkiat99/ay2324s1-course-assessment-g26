@@ -102,6 +102,16 @@ io.on('connection', (socket) => {
       }
     });
 
+    // For user to send message in to room (for testing)
+    socket.on('send_message', (data) => {
+      if (data.room_id && data.room_id.length > 0) {
+        io.to(data.room_id).emit('receive_message', {
+          user_id: data.user_id,
+          message: data.message,
+        });
+      }
+    });
+
     // Set timeout for 30 seconds to disconnect user if not matched
     setTimeout(() => {
       isMatched || socket.disconnect();
@@ -154,6 +164,7 @@ async function matchUsersInQueue() {
         other_user_id: user1Id,
         room_id: newRoomId,
       };
+
       // Send one notification for each user to the notifications queue
       await channel.sendToQueue(
         'notificationQueue',

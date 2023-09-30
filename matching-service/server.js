@@ -1,4 +1,4 @@
-// to start RabbitMQ, run: docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management
+// to start RabbitMQ (need to install docker first), run: docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management
 // to start server, cd to matching-service directory and run: npm run dev
 // to view RabbitMQ Management UI, go to: http://localhost:15672/ (username and password are both 'guest')
 
@@ -43,10 +43,11 @@ async function connect() {
   }
 }
 
-// Maintain a map of user ID to socket
+// Maintain a map of user ID to socket (maybe can delete)
 const clientToSocketId = {};
 
 io.on('connection', (socket) => {
+  // When user requests to find a match
   socket.on('find_match', (data) => {
     // Store socket id of each user
     clientToSocketId[data.user_id] = socket.id;
@@ -62,7 +63,7 @@ io.on('connection', (socket) => {
     // Add user to match queue
     addToMatchQueue(data.user_id);
 
-    // Emit a response event to notify user
+    // Emit a response event to notify user that matching is in progress
     socket.emit('finding_match', {
       message: `Connected to matching service at port ${MATCHING_SERVER_PORT}`,
     });
@@ -70,6 +71,8 @@ io.on('connection', (socket) => {
     // Check for a successful match in the notifications queue
     channel.consume('notificationQueue', (msg) => {
       const msgObj = JSON.parse(msg.content.toString());
+
+      // If notification for that user is found
       if (msgObj.user_id === data.user_id) {
         console.log(`Adding user: ${data.user_id} to room: ${msgObj.room_id}`);
 
@@ -93,11 +96,13 @@ io.on('connection', (socket) => {
           user_id: data.user_id,
           room_id: msgObj.room_id,
         });
+
+        // Update matched status
         isMatched = true;
       }
     });
 
-    // Set timeout for 30 seconds to disconnect user
+    // Set timeout for 30 seconds to disconnect user if not matched
     setTimeout(() => {
       isMatched || socket.disconnect();
     }, 30000);
@@ -149,7 +154,7 @@ async function matchUsersInQueue() {
         other_user_id: user1Id,
         room_id: newRoomId,
       };
-      // Send one notification for each user
+      // Send one notification for each user to the notifications queue
       await channel.sendToQueue(
         'notificationQueue',
         Buffer.from(JSON.stringify(newNotification1))

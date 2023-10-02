@@ -55,7 +55,6 @@ const Matching = () => {
       </div>
     );
   };
-  console.log('difficulty: ', difficulty);
 
   const renderDifficultyOptions = () => {
     return (

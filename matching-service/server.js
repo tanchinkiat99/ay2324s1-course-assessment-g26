@@ -18,8 +18,20 @@ const io = socketIO(server, {
   },
 });
 
+// env variables
 const MATCHING_SERVER_PORT = process.env.MATCHING_SERVER_PORT || 5000;
 const RABBITMQ_URL = 'amqp://guest:guest@localhost:5672/';
+
+// queue names
+const NOTIFICATION_QUEUE = 'notificationQueue';
+const EASY_MATCH_QUEUE = 'easyMatchQueue';
+const MEDIUM_MATCH_QUEUE = 'mediumMatchQueue';
+const HARD_MATCH_QUEUE = 'hardMatchQueue';
+const DIFFICULTY_TO_QUEUE = {
+  easy: EASY_MATCH_QUEUE,
+  medium: MEDIUM_MATCH_QUEUE,
+  hard: HARD_MATCH_QUEUE,
+};
 
 app.get('/hello', (req, res) => {
   res.json({ message: 'hello' });
@@ -36,8 +48,10 @@ async function connect() {
     channel = await connection.createChannel();
 
     // Creates queues for matches and notifications
-    await channel.assertQueue('matchQueue', { durable: false });
-    await channel.assertQueue('notificationQueue', { durable: false });
+    await channel.assertQueue(EASY_MATCH_QUEUE, { durable: false });
+    await channel.assertQueue(MEDIUM_MATCH_QUEUE, { durable: false });
+    await channel.assertQueue(HARD_MATCH_QUEUE, { durable: false });
+    await channel.assertQueue(NOTIFICATION_QUEUE, { durable: false });
   } catch (error) {
     console.log(error);
   }
@@ -61,7 +75,7 @@ io.on('connection', (socket) => {
     let isMatched = false;
 
     // Add user to match queue
-    addToMatchQueue(data.user_id);
+    addToMatchQueue(data.user_id, data.difficulty);
 
     // Emit a response event to notify user that matching is in progress
     socket.emit('finding_match', {
@@ -69,7 +83,7 @@ io.on('connection', (socket) => {
     });
 
     // Check for a successful match in the notifications queue
-    channel.consume('notificationQueue', (msg) => {
+    channel.consume(NOTIFICATION_QUEUE, (msg) => {
       const msgObj = JSON.parse(msg.content.toString());
 
       // If notification for that user is found
@@ -120,33 +134,37 @@ io.on('connection', (socket) => {
 });
 
 // Adds user (user id) to matching queue
-async function addToMatchQueue(message) {
+async function addToMatchQueue(message, difficulty) {
   try {
+    const queue = DIFFICULTY_TO_QUEUE[difficulty];
     // Add the current user ID to the queue
-    channel.sendToQueue('matchQueue', Buffer.from(message));
+    channel.sendToQueue(queue, Buffer.from(message));
   } catch (error) {
     console.error('Error:', error);
   }
 }
 
 // Matches first 2 users in queue if queue length >= 2
-async function matchUsersInQueue() {
+async function matchUsersInQueue(difficulty) {
   try {
+    // Get queue based on difficulty
+    const queue = DIFFICULTY_TO_QUEUE[difficulty];
+
     // Get the current number of user IDs in the queue
-    const matchQueueStats = await channel.checkQueue('matchQueue');
+    const matchQueueStats = await channel.checkQueue(queue);
 
     // If there are more than 2 users in queue, match 2 users together
     if (matchQueueStats.messageCount >= 2) {
       console.log('Matching users');
       // Get first user
-      const user1 = await channel.get('matchQueue');
+      const user1 = await channel.get(queue);
       if (user1 !== null) {
         channel.ack(user1);
       }
       const user1Id = user1.content.toString();
 
       // Get second user
-      const user2 = await channel.get('matchQueue');
+      const user2 = await channel.get(queue);
       if (user2 !== null) {
         channel.ack(user2);
       }
@@ -158,20 +176,22 @@ async function matchUsersInQueue() {
         user_id: user1Id,
         other_user_id: user2Id,
         room_id: newRoomId,
+        difficulty: difficulty,
       };
       const newNotification2 = {
         user_id: user2Id,
         other_user_id: user1Id,
         room_id: newRoomId,
+        difficulty: difficulty,
       };
 
       // Send one notification for each user to the notifications queue
       await channel.sendToQueue(
-        'notificationQueue',
+        NOTIFICATION_QUEUE,
         Buffer.from(JSON.stringify(newNotification1))
       );
       await channel.sendToQueue(
-        'notificationQueue',
+        NOTIFICATION_QUEUE,
         Buffer.from(JSON.stringify(newNotification2))
       );
 
@@ -190,7 +210,9 @@ async function matchUsersInQueue() {
 
 // Check for valid matches every 5 seconds
 setInterval(async () => {
-  matchUsersInQueue();
+  matchUsersInQueue('easy');
+  matchUsersInQueue('medium');
+  matchUsersInQueue('hard');
 }, 5000);
 
 server.listen(MATCHING_SERVER_PORT, () => {

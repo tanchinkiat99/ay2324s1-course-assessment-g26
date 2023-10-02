@@ -13,6 +13,7 @@ const Matching = () => {
   const [roomId, setRoomId] = useState('');
   const [roomMessages, setRoomMessages] = useState([]);
   const [currentMessage, setCurrentMessage] = useState('');
+  const [difficulty, setDifficulty] = useState('easy');
 
   // TODO: get user id from the actual user id instead of input
   const [userId, setUserId] = useState('');
@@ -20,6 +21,7 @@ const Matching = () => {
   const requestToFindMatch = () => {
     socket.emit('find_match', {
       user_id: userId,
+      difficulty: difficulty,
     });
   };
 
@@ -50,6 +52,23 @@ const Matching = () => {
             </div>
           );
         })}
+      </div>
+    );
+  };
+  console.log('difficulty: ', difficulty);
+
+  const renderDifficultyOptions = () => {
+    return (
+      <div>
+        <div>Select your difficulty:</div>
+        <div onChange={(e) => setDifficulty(e.target.value)}>
+          <input type="radio" value="easy" name="gender" defaultChecked /> Easy
+          <br />
+          <input type="radio" value="medium" name="gender" /> Medium
+          <br />
+          <input type="radio" value="hard" name="gender" /> Hard
+          <br />
+        </div>
       </div>
     );
   };
@@ -107,6 +126,7 @@ const Matching = () => {
         }}
       />
       <br />
+      {renderDifficultyOptions()}
       <button
         onClick={requestToFindMatch}
         style={{ width: '20%', borderWidth: 1, borderColor: 'black' }}

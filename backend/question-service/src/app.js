@@ -4,7 +4,9 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import questionRoutes from './routes/questionRoutes.js';
 
-dotenv.config();
+dotenv.config({ path: '.env.local' });
+
+// console.log(process.env.MONGODB_URI);
 const app = express();
 // Use the cors middleware and configure it
 // If you know the origin of your frontend, you can specify it:
@@ -17,19 +19,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Connect to MongoDB
-export const connectToDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      dbName: 'peerprep',
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('MongoDB is connected');
-  } catch (error) {
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    dbName: 'peerprep',
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((error) => {
     console.error('Could not connect to MongoDB', error);
-  }
-};
-connectToDB();
+  });
 
 // Routes setup
 app.use('/questions', questionRoutes);

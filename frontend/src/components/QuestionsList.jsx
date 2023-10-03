@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import QuestionRow from './QuestionRow';
+import { getAllQuestions, deleteQuestion } from '@app/api/questionService';
 
 const QuestionTable = ({ questions, handleDelete }) => {
   const router = useRouter();
@@ -43,9 +44,16 @@ const QuestionsList = () => {
   // Get all questions as soon as page loads
   useEffect(() => {
     const fetchQuestions = async () => {
-      const response = await fetch('http://localhost:5000/questions');
-      const data = await response.json();
-      setQuestions(data);
+      try {
+        const data = await getAllQuestions();
+        setQuestions(data);
+      } catch (error) {
+        console.error('Error:', error);
+        console.error('Error Details:', error.response?.data);
+      }
+      // const data = await getAllQuestions();
+      // console.log(data);
+      // setQuestions(data);
     };
     fetchQuestions();
   }, []);
@@ -54,9 +62,7 @@ const QuestionsList = () => {
     const confirmed = confirm('Are you sure you want to delete this question?');
     if (confirmed) {
       try {
-        await fetch(`http://localhost:5000/questions/${id}`, {
-          method: 'DELETE',
-        });
+        await deleteQuestion(id);
         const filteredQuestions = questions.filter(
           (question) => question._id !== id
         );

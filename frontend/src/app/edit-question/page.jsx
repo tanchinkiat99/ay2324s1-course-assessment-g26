@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import QuestionForm from '@components/QuestionForm';
+import { getQuestionById, updateQuestion } from '@app/api/questionService';
 
 const EditQuestion = () => {
   const router = useRouter();
@@ -22,16 +23,18 @@ const EditQuestion = () => {
   useEffect(() => {
     // Fill in form with question details
     const getQuestionDetails = async () => {
-      const response = await fetch(
-        `http://localhost:5000/questions/${questionId}`
-      );
-      const data = await response.json();
-      setPost({
-        title: data.title,
-        description: data.description,
-        categories: data.categories,
-        complexity: data.complexity,
-      });
+      try {
+        const data = await getQuestionById(questionId);
+        console.log(data);
+        setPost({
+          title: data.title,
+          description: data.description,
+          categories: data.categories,
+          complexity: data.complexity,
+        });
+      } catch (error) {
+        console.log(error);
+      }
     };
 
     if (questionId) {
@@ -39,7 +42,7 @@ const EditQuestion = () => {
     }
   }, [questionId]);
 
-  const updateQuestion = async (e) => {
+  const updateQuestionSubmit = async (e) => {
     // Prevent page reload
     e.preventDefault();
     setSubmitting(true);
@@ -47,21 +50,8 @@ const EditQuestion = () => {
 
     try {
       // TODO: dont hardcode API here
-      const response = await fetch(
-        `http://localhost:5000/questions/${questionId}`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            // TODO: Add session?.user.id if want to associate user with the questions they create
-            ...post,
-          }),
-        }
-      );
-      if (response.ok) {
-        // Push user to homepage
-        router.push('/');
-      }
+      const response = await updateQuestion(questionId, post);
+      router.push('/');
     } catch (error) {
       console.log(error);
     } finally {
@@ -75,7 +65,7 @@ const EditQuestion = () => {
       post={post}
       setPost={setPost}
       submitting={submitting}
-      handleSubmit={updateQuestion}
+      handleSubmit={updateQuestionSubmit}
     />
   );
 };

@@ -50,10 +50,11 @@ const QuestionForm = ({ type, post, setPost, submitting, handleSubmit }) => {
           </span>
           <select
             id="complexity"
+            value={post.complexity}
             onChange={(e) => setPost({ ...post, complexity: e.target.value })}
             required
           >
-            <option value="" selected disabled hidden>
+            <option value="" defaultValue disabled hidden>
               Select complexity
             </option>
             <option value="Easy">Easy</option>

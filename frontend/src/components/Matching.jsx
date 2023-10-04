@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
-const socket = io.connect('http://localhost:5000');
+const socket = io.connect('http://localhost:5001');
 
 const Matching = () => {
   const [isConnected, setIsConnected] = useState(false);

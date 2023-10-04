@@ -19,7 +19,7 @@ const io = socketIO(server, {
 });
 
 // env variables
-const MATCHING_SERVER_PORT = process.env.MATCHING_SERVER_PORT || 5000;
+const MATCHING_SERVER_PORT = process.env.MATCHING_SERVER_PORT || 5001;
 const RABBITMQ_URL = 'amqp://guest:guest@localhost:5672/';
 
 // queue names

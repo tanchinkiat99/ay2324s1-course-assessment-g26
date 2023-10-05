@@ -118,10 +118,9 @@ const Matching = () => {
 
   return (
     <div>
-      <div>Match with a friend!</div>
-      <br />
+      <div className="font-bold mt-2">Match with a friend!</div>
       <input
-        className="border border-black p-2"
+        className="search_input peer"
         name="userIdInput"
         value={userId}
         placeholder="Enter your user id here"
@@ -130,29 +129,22 @@ const Matching = () => {
           setUserId(e.target.value);
         }}
       />
-      <br />
       {renderDifficultyOptions()}
-      <button className="border border-black p-2" onClick={requestToFindMatch}>
+      <button
+        className="border border-grey p-2 rounded-md m-1"
+        onClick={requestToFindMatch}
+      >
         Click here to find a match
       </button>
-      <br />
-      <div
-        className={`${
-          isConnected ? 'bg-green-500' : 'bg-red-500'
-        } border border-black p-1`}
-      >
+      <div className={`${isConnected ? 'bg-green-500' : 'bg-red-500'} p-1`}>
         {isConnected ? 'Finding a match' : 'Disconnected'}
       </div>
-      <div
-        className={`${
-          isMatched ? 'bg-green-500' : 'bg-red-500'
-        } border border-black p-1`}
-      >
+      <div className={`${isMatched ? 'bg-green-500' : 'bg-red-500'} p-1`}>
         {isMatched ? 'Matched with: ' + otherUser : 'Not matched'}
       </div>
       <Countdown startCountdown={startCountdown} />
       <input
-        className="border border-black p-2"
+        className="search_input peer"
         name="sendMessage"
         value={currentMessage}
         placeholder="Type something here"
@@ -160,7 +152,10 @@ const Matching = () => {
           setCurrentMessage(e.target.value);
         }}
       />
-      <button className="border border-black p-2" onClick={sendMessageIntoRoom}>
+      <button
+        className="border border-grey p-2 rounded-md m-1"
+        onClick={sendMessageIntoRoom}
+      >
         Send
       </button>
       {renderRoomMessages()}

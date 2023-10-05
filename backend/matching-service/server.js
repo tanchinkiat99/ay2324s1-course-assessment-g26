@@ -69,14 +69,9 @@ async function connect() {
   }
 }
 
-// Maintain a map of user ID to socket (maybe can delete)
-const clientToSocketId = {};
-
 io.on('connection', (socket) => {
   // When user requests to find a match
   socket.on('find_match', (data) => {
-    // Store socket id of each user
-    clientToSocketId[data.user_id] = socket.id;
     console.log(
       'Request to find match:\n',
       `Socket ID: ${socket.id}\n`,
@@ -95,8 +90,9 @@ io.on('connection', (socket) => {
     });
 
     // Check for a successful match in the notifications queue
-    channel.consume(NOTIFICATION_QUEUE, (msg) => {
+    const consumer = channel.consume(NOTIFICATION_QUEUE, (msg) => {
       const msgObj = JSON.parse(msg.content.toString());
+      console.log(data.user_id, msgObj);
 
       // If notification for that user is found
       if (msgObj.user_id === data.user_id) {
@@ -126,6 +122,12 @@ io.on('connection', (socket) => {
         // Update matched status
         isMatched = true;
       }
+
+      // Set timeout for 30 seconds to disconnect user if not matched
+      setTimeout(() => {
+        cancelConsumer(consumer);
+        isMatched || socket.disconnect();
+      }, 30000);
     });
 
     // For user to send message in to room (for testing)
@@ -137,11 +139,6 @@ io.on('connection', (socket) => {
         });
       }
     });
-
-    // Set timeout for 30 seconds to disconnect user if not matched
-    setTimeout(() => {
-      isMatched || socket.disconnect();
-    }, 30000);
   });
 });
 
@@ -198,26 +195,24 @@ async function matchUsersInQueue(difficulty) {
       };
 
       // Send one notification for each user to the notifications queue
-      await channel.sendToQueue(
+      channel.sendToQueue(
         NOTIFICATION_QUEUE,
         Buffer.from(JSON.stringify(newNotification1))
       );
-      await channel.sendToQueue(
+      channel.sendToQueue(
         NOTIFICATION_QUEUE,
         Buffer.from(JSON.stringify(newNotification2))
-      );
-
-      console.log(
-        'Matched users:\n',
-        'User 1: ',
-        user1Id,
-        '\nUser 2: ',
-        user2Id
       );
     }
   } catch (error) {
     console.error('Error: ', error);
   }
+}
+
+// Unsubscribe consumer from notifications queue
+async function cancelConsumer(consumer) {
+  const consumerObj = await consumer;
+  channel.cancel(consumerObj.consumerTag);
 }
 
 // Check for valid matches every 5 seconds

@@ -48,10 +48,22 @@ async function connect() {
     channel = await connection.createChannel();
 
     // Creates queues for matches and notifications
-    await channel.assertQueue(EASY_MATCH_QUEUE, { durable: false });
-    await channel.assertQueue(MEDIUM_MATCH_QUEUE, { durable: false });
-    await channel.assertQueue(HARD_MATCH_QUEUE, { durable: false });
-    await channel.assertQueue(NOTIFICATION_QUEUE, { durable: false });
+    await channel.assertQueue(EASY_MATCH_QUEUE, {
+      durable: false,
+      arguments: { 'x-message-ttl': 30000 },
+    });
+    await channel.assertQueue(MEDIUM_MATCH_QUEUE, {
+      durable: false,
+      arguments: { 'x-message-ttl': 30000 },
+    });
+    await channel.assertQueue(HARD_MATCH_QUEUE, {
+      durable: false,
+      arguments: { 'x-message-ttl': 30000 },
+    });
+    await channel.assertQueue(NOTIFICATION_QUEUE, {
+      durable: false,
+      arguments: { 'x-message-ttl': 30000 },
+    });
   } catch (error) {
     console.log(error);
   }

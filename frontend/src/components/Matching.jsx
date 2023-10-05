@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import Countdown from './Countdown';
 
-const socket = io.connect('http://localhost:5001');
+const socket = io.connect(process.env.NEXT_PUBLIC_MATCHING_SERVICE_URL);
 
 const Matching = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -20,6 +20,7 @@ const Matching = () => {
   const [userId, setUserId] = useState('');
 
   const requestToFindMatch = () => {
+    socket.connect();
     socket.emit('find_match', {
       user_id: userId,
       difficulty: difficulty,
@@ -111,6 +112,7 @@ const Matching = () => {
       socket.off('match_found');
       socket.off('user_joined_room');
       socket.off('room_message');
+      socket.disconnect();
     };
   }, [socket]);
 
@@ -143,7 +145,7 @@ const Matching = () => {
       </div>
       <div
         className={`${
-          isConnected ? 'bg-green-500' : 'bg-red-500'
+          isMatched ? 'bg-green-500' : 'bg-red-500'
         } border border-black p-1`}
       >
         {isMatched ? 'Matched with: ' + otherUser : 'Not matched'}

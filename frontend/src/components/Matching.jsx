@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import Countdown from './Countdown';
 
 const socket = io.connect('http://localhost:5001');
 
 const Matching = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isMatched, setIsMatched] = useState(false);
-  const [countdown, setCountdown] = useState(30);
+  const [startCountdown, setStartCountdown] = useState(false);
   const [otherUser, setOtherUser] = useState('');
   const [roomId, setRoomId] = useState('');
   const [roomMessages, setRoomMessages] = useState([]);
@@ -77,12 +78,14 @@ const Matching = () => {
       console.log(data.message);
       if (data) {
         setIsConnected(true);
+        setStartCountdown(true);
       }
     });
 
     socket.on('match_found', (data) => {
       console.log(data.message);
       setIsMatched(true);
+      setStartCountdown(false);
       setOtherUser(data.other_user_id);
       setRoomId(data.room_id);
     });
@@ -91,6 +94,7 @@ const Matching = () => {
       console.log('Disconnected');
       setIsMatched(false);
       setIsConnected(false);
+      setStartCountdown(false);
     });
 
     socket.on('user_joined_room', (data) => {
@@ -112,12 +116,12 @@ const Matching = () => {
 
   return (
     <div>
-      <div>THIS IS THE MATCHING SERVICE PART</div>
+      <div>Match with a friend!</div>
       <br />
       <input
+        className="border border-black p-2"
         name="userIdInput"
         value={userId}
-        style={{ borderColor: 'black', borderWidth: 1 }}
         placeholder="Enter your user id here"
         onChange={(e) => {
           setIsConnected(false);
@@ -126,65 +130,35 @@ const Matching = () => {
       />
       <br />
       {renderDifficultyOptions()}
-      <button
-        onClick={requestToFindMatch}
-        style={{ width: '20%', borderWidth: 1, borderColor: 'black' }}
-      >
+      <button className="border border-black p-2" onClick={requestToFindMatch}>
         Click here to find a match
       </button>
       <br />
       <div
-        style={
-          isConnected
-            ? {
-                backgroundColor: 'green',
-                width: '20%',
-                borderWidth: 1,
-                borderColor: 'black',
-              }
-            : {
-                backgroundColor: 'red',
-                width: '20%',
-                borderWidth: 1,
-                borderColor: 'black',
-              }
-        }
+        className={`${
+          isConnected ? 'bg-green-500' : 'bg-red-500'
+        } border border-black p-1`}
       >
         {isConnected ? 'Finding a match' : 'Disconnected'}
       </div>
       <div
-        style={
-          isMatched
-            ? {
-                backgroundColor: 'green',
-                width: '20%',
-                borderWidth: 1,
-                borderColor: 'black',
-              }
-            : {
-                backgroundColor: 'red',
-                width: '20%',
-                borderWidth: 1,
-                borderColor: 'black',
-              }
-        }
+        className={`${
+          isConnected ? 'bg-green-500' : 'bg-red-500'
+        } border border-black p-1`}
       >
         {isMatched ? 'Matched with: ' + otherUser : 'Not matched'}
       </div>
-      <div>{countdown}</div>
+      <Countdown startCountdown={startCountdown} />
       <input
+        className="border border-black p-2"
         name="sendMessage"
         value={currentMessage}
-        style={{ borderColor: 'black', borderWidth: 1 }}
         placeholder="Type something here"
         onChange={(e) => {
           setCurrentMessage(e.target.value);
         }}
       />
-      <button
-        onClick={sendMessageIntoRoom}
-        style={{ width: '20%', borderWidth: 1, borderColor: 'black' }}
-      >
+      <button className="border border-black p-2" onClick={sendMessageIntoRoom}>
         Send
       </button>
       {renderRoomMessages()}

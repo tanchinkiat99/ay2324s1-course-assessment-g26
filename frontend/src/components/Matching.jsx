@@ -107,6 +107,12 @@ const Matching = ({ onMatch }) => {
       addMessageIntoRoom(data.user_id, data.message);
     });
 
+    // Reset connection if page is refreshed
+    window.addEventListener('beforeunload', (e) => {
+      console.log(e);
+      socket.disconnect();
+    });
+
     return () => {
       socket.off('find_match');
       socket.off('finding_match');

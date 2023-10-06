@@ -140,6 +140,10 @@ io.on('connection', (socket) => {
       }
     });
   });
+
+  socket.on('disconnect', () => {
+    socket.disconnect();
+  });
 });
 
 // Adds user (user id) to matching queue

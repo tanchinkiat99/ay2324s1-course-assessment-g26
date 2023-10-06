@@ -6,7 +6,7 @@ import Countdown from './Countdown';
 
 const socket = io.connect(process.env.NEXT_PUBLIC_MATCHING_SERVICE_URL);
 
-const Matching = () => {
+const Matching = ({ onMatch }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isMatched, setIsMatched] = useState(false);
   const [startCountdown, setStartCountdown] = useState(false);
@@ -89,6 +89,7 @@ const Matching = () => {
       setStartCountdown(false);
       setOtherUser(data.other_user_id);
       setRoomId(data.room_id);
+      onMatch(data.room_id);
     });
 
     socket.on('disconnect', () => {

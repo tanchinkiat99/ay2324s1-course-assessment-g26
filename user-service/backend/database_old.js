@@ -36,3 +36,5 @@ export async function insertHistory(email, question_id){
 export async function deleteHistory(email){
     const result = await pool.query("DELETE FROM history_bank WHERE email = (?)", [email])
 }
+
+export default pool;

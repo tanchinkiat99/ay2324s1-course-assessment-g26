@@ -1,5 +1,5 @@
 import express from "express"
-import {getPassword, insertUser, updateUser, deleteUser, getHistory, insertHistory, deleteHistory} from './database.js'
+import {getPassword, insertUser, updateUser, deleteUser, getHistory, insertHistory, deleteHistory} from './database_old.js'
 
 const app = express()
 

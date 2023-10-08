@@ -1,12 +1,17 @@
 'use client';
 
+import { useRouter } from 'next/navigation'
+
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import Countdown from './Countdown';
 
 const socket = io.connect(process.env.NEXT_PUBLIC_MATCHING_SERVICE_URL);
 
+
 const Matching = ({ onMatch }) => {
+  const router = useRouter();
+  
   const [isConnected, setIsConnected] = useState(false);
   const [isMatched, setIsMatched] = useState(false);
   const [startCountdown, setStartCountdown] = useState(false);
@@ -90,6 +95,8 @@ const Matching = ({ onMatch }) => {
       setOtherUser(data.other_user_id);
       setRoomId(data.room_id);
       onMatch(data.room_id);
+
+      router.push(`/coding-page/room/${data.room_id}`);
     });
 
     socket.on('disconnect', () => {

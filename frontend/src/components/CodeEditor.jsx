@@ -4,7 +4,7 @@ import "ace-builds/src-noconflict/theme-monokai";
 import { useEffect, useRef } from 'react';
 import { initYjs, getYText } from '../utils/yjsSetup';
 
-export default function CollaborativeEditor({ roomId = 'demo-room'}) {
+export default function CodeEditor({ roomId = 'demo-room'}) {
   const editorRef = useRef(null);
 
   useEffect(() => {

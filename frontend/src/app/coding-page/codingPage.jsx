@@ -1,5 +1,9 @@
-import CollaborativeEditor from '../components/CodeEditor';
-function Home() {
+// This is the page that is shown when people get matched. 
+// Shows the question, a collaborative code editor and a chat box.
+
+import CodeEditor from '../components/CodeEditor';
+
+export default function Home() {
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
       <div style={{ flex: 1, padding: '20px', borderRight: '1px solid black' }}>
@@ -10,11 +14,8 @@ function Home() {
       </div>
       <div style={{ flex: 2, padding: '20px' }}>
         <h2>Editor</h2>
-        <CollaborativeEditor roomId={'demo-room'}/>
+        <CodeEditor />
       </div>
     </div>
   );
 }
-
-export default Home;
-

@@ -12,7 +12,7 @@ server.on('upgrade', (request, socket, head) => {
   });
 });
 
-const port = 3001;
+const port = 5555;
 
 server.listen(port, () => 
     console.log(`Server started on http://localhost:${port}/`)

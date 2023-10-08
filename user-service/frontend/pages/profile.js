@@ -1,9 +1,8 @@
 //user-service/frontend/pages/profile.js
-import PrivateRoute from '@pages/api/auth/PrivateRoute';
 import { useSession } from 'next-auth/react';
-
+import PrivateRoute from "@pages/api/auth/PrivateRoute";
 const ProfilePage = () => {
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
 
     if (!session) return null;
 

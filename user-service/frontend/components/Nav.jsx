@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { signIn, signOut, useSession, getProviders } from 'next-auth/react';
 
@@ -33,12 +32,6 @@ const Nav = () => {
                 Sign Out
             </button>
             <Link href="/profile">
-                <Image
-                    src={session?.user.image}
-                    width={50}
-                    height={50}
-                    className="rounded-full"
-                />
             </Link>
         </div>
     );
@@ -55,17 +48,11 @@ const Nav = () => {
     return (
         <nav className="flex justify-between w-full mb-16 pt-3">
             <Link href="/" className="flex gap-5 flex-center items-center">
-                <Image
-                    className="object-contain"
-                    src="/logo.svg"
-                    width={80}
-                    height={80}
-                />
                 <p className="logo_txt">PeerPrep</p>
             </Link>
             {/* Show signin and signout */}
             <div className="sm:flex hidden">
-                {session?.user ? renderUserSessionControls() : renderSignInButtons()}
+                {session?.email ? renderUserSessionControls() : renderSignInButtons()}
             </div>
         </nav>
     );

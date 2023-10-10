@@ -7,20 +7,25 @@ const http = require('http');
 const socketIO = require('socket.io');
 const cors = require('cors');
 const amqp = require('amqplib');
+const dotenv = require('dotenv');
+
+dotenv.config({ path: '.env.local' });
 
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
-const io = socketIO(server, {
-  cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-  },
-});
 
 // env variables
 const MATCHING_SERVER_PORT = process.env.MATCHING_SERVER_PORT || 5001;
-const RABBITMQ_URL = 'amqp://guest:guest@localhost:5672/';
+const RABBITMQ_URL = `${process.env.RABBITMQ_URL}:${process.env.RABBITMQ_PORT}`;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+const io = socketIO(server, {
+  cors: {
+    origin: FRONTEND_URL,
+    methods: ['GET', 'POST'],
+  },
+});
 
 // queue names
 const NOTIFICATION_QUEUE = 'notificationQueue';

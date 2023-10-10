@@ -38,10 +38,6 @@ const DIFFICULTY_TO_QUEUE = {
   hard: HARD_MATCH_QUEUE,
 };
 
-app.get('/hello', (req, res) => {
-  res.json({ message: 'hello' });
-});
-
 // rabbitmq to be global variables
 let channel, connection;
 
@@ -87,7 +83,7 @@ io.on('connection', (socket) => {
     let isMatched = false;
 
     // Add user to match queue
-    addToMatchQueue(data.user_id, data.difficulty);
+    addToMatchQueue(socket.id, data.difficulty);
 
     // Emit a response event to notify user that matching is in progress
     socket.emit('finding_match', {
@@ -97,10 +93,10 @@ io.on('connection', (socket) => {
     // Check for a successful match in the notifications queue
     const consumer = channel.consume(NOTIFICATION_QUEUE, (msg) => {
       const msgObj = JSON.parse(msg.content.toString());
-      console.log(data.user_id, msgObj);
+      console.log(socket.id, msgObj);
 
       // If notification for that user is found
-      if (msgObj.user_id === data.user_id) {
+      if (msgObj.user_socket_id === socket.id) {
         console.log(`Adding user: ${data.user_id} to room: ${msgObj.room_id}`);
 
         // Ack message to delete notification from queue
@@ -144,6 +140,10 @@ io.on('connection', (socket) => {
         });
       }
     });
+
+    socket.on('disconnect', () => {
+      cancelConsumer(consumer);
+    });
   });
 
   socket.on('disconnect', () => {
@@ -155,7 +155,7 @@ io.on('connection', (socket) => {
 async function addToMatchQueue(message, difficulty) {
   try {
     const queue = DIFFICULTY_TO_QUEUE[difficulty];
-    // Add the current user ID to the queue
+    // Add the current client socket ID to the queue
     channel.sendToQueue(queue, Buffer.from(message));
   } catch (error) {
     console.error('Error:', error);
@@ -191,14 +191,14 @@ async function matchUsersInQueue(difficulty) {
       // Create a socket room and add to notifications queue
       const newRoomId = user1Id + user2Id;
       const newNotification1 = {
-        user_id: user1Id,
-        other_user_id: user2Id,
+        user_socket_id: user1Id,
+        other_user_socket_id: user2Id,
         room_id: newRoomId,
         difficulty: difficulty,
       };
       const newNotification2 = {
-        user_id: user2Id,
-        other_user_id: user1Id,
+        user_socket_id: user2Id,
+        other_user_socket_id: user1Id,
         room_id: newRoomId,
         difficulty: difficulty,
       };

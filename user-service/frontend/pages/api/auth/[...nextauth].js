@@ -1,4 +1,4 @@
-// frontend/pages/api/auth/[...nextauth].js
+//user-service/frontend/pages/api/auth/[...nextauth].js
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/Google'
@@ -14,7 +14,7 @@ export default NextAuth({
             },
             authorize: async (credentials, req) => {
                 try {
-                    const response = await axios.post('http://localhost:3001/api/login', {
+                    const response = await axios.post(`${process.env.EXPRESS_SERVER}/auth/login`, {
                         email: credentials.email,
                         password: credentials.password,
                     });

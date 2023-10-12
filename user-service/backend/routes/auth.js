@@ -1,3 +1,4 @@
+//user-service/backend/routes/auth.js
 import cookie from 'cookie';
 import dotenv from 'dotenv';
 import express from 'express';
@@ -77,7 +78,7 @@ router.post('/signout', (req, res) => {
 });
 
 router.post('/google-signin', async (req, res) => {
-    const {idToken} = req.body;
+    const { idToken, role_type } = req.body;
 
     try {
         const ticket = await googleClient.verifyIdToken({
@@ -89,12 +90,15 @@ router.post('/google-signin', async (req, res) => {
         const email = payload.email;
         const name = payload.name;
 
+        // Determine the role based on the request body
+        const userRole = role_type || 'user'; // Default to ordinary user if not specified
+
         let user = await getUserByEmail(email); // Check whether user exists in database
         if (!user) {
-            user = await insertUser(email, name,null, payload.sub, 'google');
+            user = await insertUser(email, name,null, payload.sub, 'google', userRole);
         }
 
-        const token = createToken({email: email});
+        const token = createToken({email: email, role_type: userRole });
 
         res.setHeader('Set-Cookie', cookie.serialize('auth', token, {
             httpOnly: true,

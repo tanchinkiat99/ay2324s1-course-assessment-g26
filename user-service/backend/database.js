@@ -61,22 +61,22 @@ export async function getUserPasswordByEmail(email) {
     return null;
 }
 
-export async function insertUser(email, name, password, google_id, auth_method) {
+export async function insertUser(email, name, password, google_id, auth_method, role_type) {
     let result;
     switch (auth_method) {
         case "local":
             const hashedPassword = await hashPassword(password);
-            result = await pool.query("INSERT INTO clientuser (email, name, password_hash, auth_method) VALUES ($1, $2, $3, 'local')", [email, name, hashedPassword]);
+            result = await pool.query("INSERT INTO clientuser (email, name, password_hash, auth_method, role_type) VALUES ($1, $2, $3, 'local', $4)", [email, name, hashedPassword, role_type]);
             break;
         case "google":
-            result = await pool.query("INSERT INTO clientuser (email, name, google_id, auth_method) VALUES ($1, $2, $3, 'google')", [email, name, google_id])
+            result = await pool.query("INSERT INTO clientuser (email, name, google_id, auth_method, role_type) VALUES ($1, $2, $3, 'google', $4)", [email, name, google_id, role_type])
             break;
 
     }
     return result.rows[0];
 }
 
-export async function updateUser(email, password) {
+export async function updateUserPassword(email, password) {
     const hashedPassword = await hashPassword(password);
     const result = await pool.query("UPDATE clientuser SET password_hash = $1 WHERE email = $2", [hashedPassword, email]);
     return result.rows[0];

@@ -29,14 +29,33 @@ const io = socketIO(server, {
 
 // queue names
 const NOTIFICATION_QUEUE = 'notificationQueue';
-const EASY_MATCH_QUEUE = 'easyMatchQueue';
-const MEDIUM_MATCH_QUEUE = 'mediumMatchQueue';
-const HARD_MATCH_QUEUE = 'hardMatchQueue';
-const DIFFICULTY_TO_QUEUE = {
-  easy: EASY_MATCH_QUEUE,
-  medium: MEDIUM_MATCH_QUEUE,
-  hard: HARD_MATCH_QUEUE,
+const EASY_JAVA_QUEUE = 'easyJavaQueue';
+const MEDIUM_JAVA_QUEUE = 'mediumJavaQueue';
+const HARD_JAVA_QUEUE = 'hardJavaQueue';
+const EASY_PYTHON_QUEUE = 'easyPythonQueue';
+const MEDIUM_PYTHON_QUEUE = 'mediumPythonQueue';
+const HARD_PYTHON_QUEUE = 'hardPythonQueue';
+const LANGUAGE_TO_QUEUES = {
+  java: {
+    easy: EASY_JAVA_QUEUE,
+    medium: MEDIUM_JAVA_QUEUE,
+    hard: HARD_JAVA_QUEUE,
+  },
+  python: {
+    easy: EASY_PYTHON_QUEUE,
+    medium: MEDIUM_PYTHON_QUEUE,
+    hard: HARD_PYTHON_QUEUE,
+  },
 };
+const ALL_QUEUES = [
+  NOTIFICATION_QUEUE,
+  EASY_JAVA_QUEUE,
+  MEDIUM_JAVA_QUEUE,
+  HARD_JAVA_QUEUE,
+  EASY_PYTHON_QUEUE,
+  MEDIUM_PYTHON_QUEUE,
+  HARD_PYTHON_QUEUE,
+];
 
 // rabbitmq to be global variables
 let channel, connection;
@@ -49,22 +68,12 @@ async function connect() {
     channel = await connection.createChannel();
 
     // Creates queues for matches and notifications
-    await channel.assertQueue(EASY_MATCH_QUEUE, {
-      durable: false,
-      arguments: { 'x-message-ttl': 30000 },
-    });
-    await channel.assertQueue(MEDIUM_MATCH_QUEUE, {
-      durable: false,
-      arguments: { 'x-message-ttl': 30000 },
-    });
-    await channel.assertQueue(HARD_MATCH_QUEUE, {
-      durable: false,
-      arguments: { 'x-message-ttl': 30000 },
-    });
-    await channel.assertQueue(NOTIFICATION_QUEUE, {
-      durable: false,
-      arguments: { 'x-message-ttl': 30000 },
-    });
+    for (let queue of ALL_QUEUES) {
+      await channel.assertQueue(queue, {
+        durable: false,
+        arguments: { 'x-message-ttl': 30000 },
+      });
+    }
   } catch (error) {
     console.log(error);
   }
@@ -87,7 +96,7 @@ io.on('connection', (socket) => {
       socket_id: socket.id,
       username: data.username,
     });
-    addToMatchQueue(message, data.difficulty);
+    addToMatchQueue(message, data.language, data.difficulty);
 
     // Emit a response event to notify user that matching is in progress
     socket.emit('finding_match', {
@@ -146,9 +155,9 @@ io.on('connection', (socket) => {
 });
 
 // Adds user (user id) to matching queue
-async function addToMatchQueue(message, difficulty) {
+async function addToMatchQueue(message, language, difficulty) {
   try {
-    const queue = DIFFICULTY_TO_QUEUE[difficulty];
+    const queue = LANGUAGE_TO_QUEUES[language][difficulty];
     // Add the current client socket ID to the queue
     channel.sendToQueue(queue, Buffer.from(message));
   } catch (error) {
@@ -157,10 +166,10 @@ async function addToMatchQueue(message, difficulty) {
 }
 
 // Matches first 2 users in queue if queue length >= 2
-async function matchUsersInQueue(difficulty) {
+async function matchUsersInQueue(language, difficulty) {
   try {
     // Get queue based on difficulty
-    const queue = DIFFICULTY_TO_QUEUE[difficulty];
+    const queue = LANGUAGE_TO_QUEUES[language][difficulty];
 
     // Get the current number of user IDs in the queue
     const matchQueueStats = await channel.checkQueue(queue);
@@ -224,9 +233,12 @@ async function cancelConsumer(consumer) {
 
 // Check for valid matches every 5 seconds
 setInterval(async () => {
-  matchUsersInQueue('easy');
-  matchUsersInQueue('medium');
-  matchUsersInQueue('hard');
+  matchUsersInQueue('java', 'easy');
+  matchUsersInQueue('java', 'medium');
+  matchUsersInQueue('java', 'hard');
+  matchUsersInQueue('python', 'easy');
+  matchUsersInQueue('python', 'medium');
+  matchUsersInQueue('python', 'hard');
 }, 5000);
 
 server.listen(MATCHING_SERVER_PORT, () => {

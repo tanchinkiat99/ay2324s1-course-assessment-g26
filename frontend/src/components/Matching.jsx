@@ -29,6 +29,7 @@ const Matching = ({ onMatch }) => {
     socket.emit('find_match', {
       username: user.name,
       difficulty: difficulty,
+      language: language,
     });
     setIsFinding(true);
     setRunCountdown(true);
@@ -57,7 +58,7 @@ const Matching = ({ onMatch }) => {
 
   const renderLanguageOptions = () => {
     return (
-      <div className="border border-grey p-5 rounded-md m-3 bg-yellow-200">
+      <div className="border border-grey p-5 rounded-md m-3 bg-pink-200">
         <div className="text-2xl font-semibold">Select your language:</div>
         <div className="text-lg" onChange={(e) => setLanguage(e.target.value)}>
           <input type="radio" value="python" name="language" defaultChecked />{' '}
@@ -74,11 +75,13 @@ const Matching = ({ onMatch }) => {
     return (
       <div>
         {isFinding ? (
-          <div className="bg-green-500 p-1">Finding a match... </div>
+          <div className="border border-grey py-2 px-10 rounded-md m-3 font-semibold text-xl bg-yellow-200">
+            Finding a match...{' '}
+          </div>
         ) : null}
         {isMatched ? (
-          <div className={`${isMatched ? 'bg-green-500' : 'bg-red-500'} p-1`}>
-            {isMatched ? 'Matched with: ' + otherUser : 'Not matched'}
+          <div className="border border-grey py-2 px-10 rounded-md m-3 font-semibold text-xl bg-green-200">
+            {'Matched with: ' + otherUser}
           </div>
         ) : null}
       </div>

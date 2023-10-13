@@ -76,14 +76,18 @@ io.on('connection', (socket) => {
     console.log(
       'Request to find match:\n',
       `Socket ID: ${socket.id}\n`,
-      `User ID: ${data.user_id}`
+      `User name: ${data.username}`
     );
 
     // Keep track of matched status
     let isMatched = false;
 
     // Add user to match queue
-    addToMatchQueue(socket.id, data.difficulty);
+    const message = JSON.stringify({
+      socket_id: socket.id,
+      username: data.username,
+    });
+    addToMatchQueue(message, data.difficulty);
 
     // Emit a response event to notify user that matching is in progress
     socket.emit('finding_match', {
@@ -97,16 +101,16 @@ io.on('connection', (socket) => {
 
       // If notification for that user is found
       if (msgObj.user_socket_id === socket.id) {
-        console.log(`Adding user: ${data.user_id} to room: ${msgObj.room_id}`);
+        console.log(`Adding user: ${data.username} to room: ${msgObj.room_id}`);
 
         // Ack message to delete notification from queue
         channel.ack(msg);
 
         // Notify user that user is joining
         socket.emit('match_found', {
-          message: `Match found, user ${data.user_id} joining room ${msgObj.room_id}`,
-          user_id: data.user_id,
-          other_user_id: msgObj.other_user_id,
+          message: `Match found, user ${data.username} joining room ${msgObj.room_id}`,
+          user_username: data.username,
+          other_user_username: msgObj.other_user_username,
           room_id: msgObj.room_id,
         });
 
@@ -115,31 +119,21 @@ io.on('connection', (socket) => {
 
         // Notify the room that a user is joining
         socket.to(msgObj.room_id).emit('user_joined_room', {
-          message: `User ${data.user_id} has joined room ${msgObj.room_id}`,
-          user_id: data.user_id,
+          message: `User ${data.username} has joined room ${msgObj.room_id}`,
+          username: data.username,
           room_id: msgObj.room_id,
         });
 
         // Update matched status
         isMatched = true;
       }
-
-      // Set timeout for 30 seconds to disconnect user if not matched
-      setTimeout(() => {
-        cancelConsumer(consumer);
-        isMatched || socket.disconnect();
-      }, 30000);
     });
 
-    // For user to send message in to room (for testing)
-    socket.on('send_message', (data) => {
-      if (data.room_id && data.room_id.length > 0) {
-        io.to(data.room_id).emit('receive_message', {
-          user_id: data.user_id,
-          message: data.message,
-        });
-      }
-    });
+    // Set timeout for 30 seconds to disconnect user if not matched
+    setTimeout(() => {
+      cancelConsumer(consumer);
+      isMatched || socket.disconnect();
+    }, 30000);
 
     socket.on('disconnect', () => {
       cancelConsumer(consumer);
@@ -179,26 +173,30 @@ async function matchUsersInQueue(difficulty) {
       if (user1 !== null) {
         channel.ack(user1);
       }
-      const user1Id = user1.content.toString();
+      const user1Details = JSON.parse(user1.content.toString());
 
       // Get second user
       const user2 = await channel.get(queue);
       if (user2 !== null) {
         channel.ack(user2);
       }
-      const user2Id = user2.content.toString();
+      const user2Details = JSON.parse(user2.content.toString());
 
       // Create a socket room and add to notifications queue
-      const newRoomId = user1Id + user2Id;
+      const newRoomId = user1Details.socket_id + user2Details.socket_id;
       const newNotification1 = {
-        user_socket_id: user1Id,
-        other_user_socket_id: user2Id,
+        user_socket_id: user1Details.socket_id,
+        user_username: user1Details.username,
+        other_user_socket_id: user2Details.socket_id,
+        other_user_username: user2Details.username,
         room_id: newRoomId,
         difficulty: difficulty,
       };
       const newNotification2 = {
-        user_socket_id: user2Id,
-        other_user_socket_id: user1Id,
+        user_socket_id: user2Details.socket_id,
+        user_username: user2Details.username,
+        other_user_socket_id: user1Details.socket_id,
+        other_user_username: user1Details.username,
         room_id: newRoomId,
         difficulty: difficulty,
       };

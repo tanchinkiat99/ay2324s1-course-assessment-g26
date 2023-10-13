@@ -8,7 +8,6 @@ const socket = io.connect(process.env.NEXT_PUBLIC_MATCHING_SERVICE_URL);
 
 const Matching = ({ onMatch }) => {
   const { data: session, status } = useSession();
-
   const [isConnected, setIsConnected] = useState(false);
   const [isMatched, setIsMatched] = useState(false);
   const [isFinding, setIsFinding] = useState(false);
@@ -153,7 +152,7 @@ const Matching = ({ onMatch }) => {
     };
   }, [socket]);
 
-  return (
+  return !isAuthenticated() ? null : (
     <div className="flex flex-col justify-center items-center p-2 m-1 bg-gray-50">
       <div className="font-bold mt-2 text-4xl text-center flex-1">
         Match with a friend!

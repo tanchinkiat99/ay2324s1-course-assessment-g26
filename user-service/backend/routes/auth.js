@@ -3,7 +3,7 @@ import cookie from 'cookie';
 import dotenv from 'dotenv';
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { getUserByEmail, getUserCompleteByEmail, getUserPasswordByEmail, insertUser, hashPassword, validatePassword } from '../database.js';
+import { getUserByEmail, getUserCompleteByEmail, getUserPasswordByEmail, insertUser, hashPassword, validatePassword, updateUserName } from '../database.js';
 import { OAuth2Client } from 'google-auth-library';
 
 dotenv.config();
@@ -14,6 +14,20 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 function createToken(payload) {
     return jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '1h' });
 }
+
+const verifyTokenFromCookie = (req, res, next) => {
+    const token = req.cookies.auth;
+    if (!token) return res.status(401).send('Access Denied');
+
+    try {
+        const verified = jwt.verify(token, process.env.SECRET_KEY);
+        req.user = verified;
+        next();
+    } catch (err) {
+        res.status(400).send('Invalid Token');
+    }
+};
+
 router.post('/signup', async (req, res) => {
     const { email, password } = req.body;
     const existingUser = await getUserByEmail(email);
@@ -25,8 +39,8 @@ router.post('/signup', async (req, res) => {
     if (!email || !password) {
         return res.status(400).json({error: "Invalid sign up information provided." })
     }
-    const newUser = await insertUser(email, password);
-    const token = createToken({ email: email });
+    const newUser = await insertUser(email, password, 'user');
+    const token = createToken({ email: email , role_type: 'user' });
 
     res.setHeader('Set-Cookie', cookie.serialize('auth', token, {
         httpOnly: true,
@@ -52,7 +66,7 @@ router.post('/signin', async (req, res) => {
         return res.status(400).json({ error: 'Invalid password' });
     }
 
-    const token = createToken({ email: email });
+    const token = createToken({ email: email, role_type: user.role_type}); // Todo (only if using): Check whether role_type can be accessed in this line
 
     res.setHeader('Set-Cookie', cookie.serialize('auth', token, {
         httpOnly: true,
@@ -78,7 +92,7 @@ router.post('/signout', (req, res) => {
 });
 
 router.post('/google-signin', async (req, res) => {
-    const { idToken, role_type } = req.body;
+    const { idToken} = req.body;
 
     try {
         const ticket = await googleClient.verifyIdToken({
@@ -90,15 +104,15 @@ router.post('/google-signin', async (req, res) => {
         const email = payload.email;
         const name = payload.name;
 
-        // Determine the role based on the request body
-        const userRole = role_type || 'user'; // Default to ordinary user if not specified
+        // Determine the role based on the request body (not in use – currently defaulting to user)
+        const userRole = 'user';
 
-        let user = await getUserByEmail(email); // Check whether user exists in database
+        let user = await getUserCompleteByEmail(email); // Check whether user exists in database
         if (!user) {
             user = await insertUser(email, name,null, payload.sub, 'google', userRole);
         }
 
-        const token = createToken({email: email, role_type: userRole });
+        const token = createToken({email: email, role_type: user.role_type });
 
         res.setHeader('Set-Cookie', cookie.serialize('auth', token, {
             httpOnly: true,
@@ -108,12 +122,37 @@ router.post('/google-signin', async (req, res) => {
             path: '/',
         }));
 
-        res.status(200).json({message: 'Login via Google successful'});
+        res.status(200).send({message: 'Login via Google successful', name: user.name,
+            role_type: user.role_type});
 
     } catch (error) {
         console.log(error)
         res.status(400).json({error: 'Google sign-in failed'});
     }
 });
+
+router.put('/updateProfile', verifyTokenFromCookie, async (req, res) => {
+    const { email, newName } = req.body;
+
+    try {
+        // Validate incoming data (more validation for production to prevent SQL injection)
+        if (!email || !newName) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Update name in the database
+        const result = updateUserName(email, newName);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        return res.status(200).json({ message: 'Profile updated successfully', user: result.rows[0] });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 export default router;

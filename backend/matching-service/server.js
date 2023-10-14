@@ -7,35 +7,55 @@ const http = require('http');
 const socketIO = require('socket.io');
 const cors = require('cors');
 const amqp = require('amqplib');
+const dotenv = require('dotenv');
+
+dotenv.config({ path: '.env.local' });
 
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
+
+// env variables
+const MATCHING_SERVER_PORT = process.env.MATCHING_SERVER_PORT || 5001;
+const RABBITMQ_URL = `${process.env.RABBITMQ_URL}:${process.env.RABBITMQ_PORT}`;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
 const io = socketIO(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: FRONTEND_URL,
     methods: ['GET', 'POST'],
   },
 });
 
-// env variables
-const MATCHING_SERVER_PORT = process.env.MATCHING_SERVER_PORT || 5001;
-const RABBITMQ_URL = 'amqp://guest:guest@localhost:5672/';
-
 // queue names
 const NOTIFICATION_QUEUE = 'notificationQueue';
-const EASY_MATCH_QUEUE = 'easyMatchQueue';
-const MEDIUM_MATCH_QUEUE = 'mediumMatchQueue';
-const HARD_MATCH_QUEUE = 'hardMatchQueue';
-const DIFFICULTY_TO_QUEUE = {
-  easy: EASY_MATCH_QUEUE,
-  medium: MEDIUM_MATCH_QUEUE,
-  hard: HARD_MATCH_QUEUE,
+const EASY_JAVA_QUEUE = 'easyJavaQueue';
+const MEDIUM_JAVA_QUEUE = 'mediumJavaQueue';
+const HARD_JAVA_QUEUE = 'hardJavaQueue';
+const EASY_PYTHON_QUEUE = 'easyPythonQueue';
+const MEDIUM_PYTHON_QUEUE = 'mediumPythonQueue';
+const HARD_PYTHON_QUEUE = 'hardPythonQueue';
+const LANGUAGE_TO_QUEUES = {
+  java: {
+    easy: EASY_JAVA_QUEUE,
+    medium: MEDIUM_JAVA_QUEUE,
+    hard: HARD_JAVA_QUEUE,
+  },
+  python: {
+    easy: EASY_PYTHON_QUEUE,
+    medium: MEDIUM_PYTHON_QUEUE,
+    hard: HARD_PYTHON_QUEUE,
+  },
 };
-
-app.get('/hello', (req, res) => {
-  res.json({ message: 'hello' });
-});
+const ALL_QUEUES = [
+  NOTIFICATION_QUEUE,
+  EASY_JAVA_QUEUE,
+  MEDIUM_JAVA_QUEUE,
+  HARD_JAVA_QUEUE,
+  EASY_PYTHON_QUEUE,
+  MEDIUM_PYTHON_QUEUE,
+  HARD_PYTHON_QUEUE,
+];
 
 // rabbitmq to be global variables
 let channel, connection;
@@ -48,22 +68,12 @@ async function connect() {
     channel = await connection.createChannel();
 
     // Creates queues for matches and notifications
-    await channel.assertQueue(EASY_MATCH_QUEUE, {
-      durable: false,
-      arguments: { 'x-message-ttl': 30000 },
-    });
-    await channel.assertQueue(MEDIUM_MATCH_QUEUE, {
-      durable: false,
-      arguments: { 'x-message-ttl': 30000 },
-    });
-    await channel.assertQueue(HARD_MATCH_QUEUE, {
-      durable: false,
-      arguments: { 'x-message-ttl': 30000 },
-    });
-    await channel.assertQueue(NOTIFICATION_QUEUE, {
-      durable: false,
-      arguments: { 'x-message-ttl': 30000 },
-    });
+    for (let queue of ALL_QUEUES) {
+      await channel.assertQueue(queue, {
+        durable: false,
+        arguments: { 'x-message-ttl': 30000 },
+      });
+    }
   } catch (error) {
     console.log(error);
   }
@@ -75,14 +85,18 @@ io.on('connection', (socket) => {
     console.log(
       'Request to find match:\n',
       `Socket ID: ${socket.id}\n`,
-      `User ID: ${data.user_id}`
+      `User name: ${data.username}`
     );
 
     // Keep track of matched status
     let isMatched = false;
 
     // Add user to match queue
-    addToMatchQueue(data.user_id, data.difficulty);
+    const message = JSON.stringify({
+      socket_id: socket.id,
+      username: data.username,
+    });
+    addToMatchQueue(message, data.language, data.difficulty);
 
     // Emit a response event to notify user that matching is in progress
     socket.emit('finding_match', {
@@ -92,20 +106,20 @@ io.on('connection', (socket) => {
     // Check for a successful match in the notifications queue
     const consumer = channel.consume(NOTIFICATION_QUEUE, (msg) => {
       const msgObj = JSON.parse(msg.content.toString());
-      console.log(data.user_id, msgObj);
+      console.log(socket.id, msgObj);
 
       // If notification for that user is found
-      if (msgObj.user_id === data.user_id) {
-        console.log(`Adding user: ${data.user_id} to room: ${msgObj.room_id}`);
+      if (msgObj.user_socket_id === socket.id) {
+        console.log(`Adding user: ${data.username} to room: ${msgObj.room_id}`);
 
         // Ack message to delete notification from queue
         channel.ack(msg);
 
         // Notify user that user is joining
         socket.emit('match_found', {
-          message: `Match found, user ${data.user_id} joining room ${msgObj.room_id}`,
-          user_id: data.user_id,
-          other_user_id: msgObj.other_user_id,
+          message: `Match found, user ${data.username} joining room ${msgObj.room_id}`,
+          user_username: data.username,
+          other_user_username: msgObj.other_user_username,
           room_id: msgObj.room_id,
         });
 
@@ -114,39 +128,37 @@ io.on('connection', (socket) => {
 
         // Notify the room that a user is joining
         socket.to(msgObj.room_id).emit('user_joined_room', {
-          message: `User ${data.user_id} has joined room ${msgObj.room_id}`,
-          user_id: data.user_id,
+          message: `User ${data.username} has joined room ${msgObj.room_id}`,
+          username: data.username,
           room_id: msgObj.room_id,
         });
 
         // Update matched status
         isMatched = true;
       }
-
-      // Set timeout for 30 seconds to disconnect user if not matched
-      setTimeout(() => {
-        cancelConsumer(consumer);
-        isMatched || socket.disconnect();
-      }, 30000);
     });
 
-    // For user to send message in to room (for testing)
-    socket.on('send_message', (data) => {
-      if (data.room_id && data.room_id.length > 0) {
-        io.to(data.room_id).emit('receive_message', {
-          user_id: data.user_id,
-          message: data.message,
-        });
-      }
+    // Set timeout for 30 seconds to disconnect user if not matched
+    setTimeout(() => {
+      cancelConsumer(consumer);
+      isMatched || socket.disconnect();
+    }, 30000);
+
+    socket.on('disconnect', () => {
+      cancelConsumer(consumer);
     });
+  });
+
+  socket.on('disconnect', () => {
+    socket.disconnect();
   });
 });
 
 // Adds user (user id) to matching queue
-async function addToMatchQueue(message, difficulty) {
+async function addToMatchQueue(message, language, difficulty) {
   try {
-    const queue = DIFFICULTY_TO_QUEUE[difficulty];
-    // Add the current user ID to the queue
+    const queue = LANGUAGE_TO_QUEUES[language][difficulty];
+    // Add the current client socket ID to the queue
     channel.sendToQueue(queue, Buffer.from(message));
   } catch (error) {
     console.error('Error:', error);
@@ -154,10 +166,10 @@ async function addToMatchQueue(message, difficulty) {
 }
 
 // Matches first 2 users in queue if queue length >= 2
-async function matchUsersInQueue(difficulty) {
+async function matchUsersInQueue(language, difficulty) {
   try {
     // Get queue based on difficulty
-    const queue = DIFFICULTY_TO_QUEUE[difficulty];
+    const queue = LANGUAGE_TO_QUEUES[language][difficulty];
 
     // Get the current number of user IDs in the queue
     const matchQueueStats = await channel.checkQueue(queue);
@@ -170,26 +182,30 @@ async function matchUsersInQueue(difficulty) {
       if (user1 !== null) {
         channel.ack(user1);
       }
-      const user1Id = user1.content.toString();
+      const user1Details = JSON.parse(user1.content.toString());
 
       // Get second user
       const user2 = await channel.get(queue);
       if (user2 !== null) {
         channel.ack(user2);
       }
-      const user2Id = user2.content.toString();
+      const user2Details = JSON.parse(user2.content.toString());
 
       // Create a socket room and add to notifications queue
-      const newRoomId = user1Id + user2Id;
+      const newRoomId = user1Details.socket_id + user2Details.socket_id;
       const newNotification1 = {
-        user_id: user1Id,
-        other_user_id: user2Id,
+        user_socket_id: user1Details.socket_id,
+        user_username: user1Details.username,
+        other_user_socket_id: user2Details.socket_id,
+        other_user_username: user2Details.username,
         room_id: newRoomId,
         difficulty: difficulty,
       };
       const newNotification2 = {
-        user_id: user2Id,
-        other_user_id: user1Id,
+        user_socket_id: user2Details.socket_id,
+        user_username: user2Details.username,
+        other_user_socket_id: user1Details.socket_id,
+        other_user_username: user1Details.username,
         room_id: newRoomId,
         difficulty: difficulty,
       };
@@ -217,9 +233,12 @@ async function cancelConsumer(consumer) {
 
 // Check for valid matches every 5 seconds
 setInterval(async () => {
-  matchUsersInQueue('easy');
-  matchUsersInQueue('medium');
-  matchUsersInQueue('hard');
+  matchUsersInQueue('java', 'easy');
+  matchUsersInQueue('java', 'medium');
+  matchUsersInQueue('java', 'hard');
+  matchUsersInQueue('python', 'easy');
+  matchUsersInQueue('python', 'medium');
+  matchUsersInQueue('python', 'hard');
 }, 5000);
 
 server.listen(MATCHING_SERVER_PORT, () => {

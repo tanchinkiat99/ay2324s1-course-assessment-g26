@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Nav from '../components/Nav.jsx'
 import {useRouter} from 'next/router';
 import {signIn, signOut, useSession} from 'next-auth/react'
 
@@ -17,7 +16,6 @@ const renderUserSession = (session) => (
 
 const HomePage = () => {
     const {data: session} = useSession()
-    const router = useRouter();
 
     return (
         <>

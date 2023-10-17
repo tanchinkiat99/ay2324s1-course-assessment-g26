@@ -1,33 +1,71 @@
-// Set up providers here
-import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-// Import SQL connectDB from database.js here after SQL database is set up
+//frontend/src/app/api/auth/[...nextauth]/route.js
+import NextAuth from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/Google'
+import axios from "axios";
 
 const handler = NextAuth({
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    })
-  ], callbacks: {
-    async session({ session }) {
-      // TODO: find user from SQL database where email == user.session.email
-      // TODO: Set session.user.id to the id string of the user retrieved so it can be used in the session
-      return session
+    providers: [
+        CredentialsProvider({
+            name: 'Credentials',
+            credentials: {
+                email: { label: "Email", type: "text" },
+                password: { label: "Password", type: "password" }
+            },
+            authorize: async (credentials, req) => {
+                try {
+                    const response = await axios.post(`${process.env.EXPRESS_SERVER}/auth/login`, {
+                        email: credentials.email,
+                        password: credentials.password,
+                    });
+
+                    if (response.data && response.data.user) {
+                        return Promise.resolve(response.data.user);
+                    } else {
+                        throw new Error('User not found');
+                    }
+                } catch (error) {
+                    throw new Error(error.message);
+                }
+            },
+        }),
+            GoogleProvider({
+                clientId: process.env.GOOGLE_ID,
+                clientSecret: process.env.GOOGLE_SECRET
+            })
+    ],
+    database: process.env.SERVER,
+    session: {
+        jwt: true,
     },
-    async signIn({ profile }) {
-      try {
-        // SQL user database only
-        // await connectToDB();
-        // TODO: Check if user already exists 
-        // TODO: If not, create new user and save in database
-        return true;
-      } catch (error) {
-        console.log(error);
-        return false;
-      }
+    secret: process.env.JWT_SECRET,
+    callbacks: {
+        async jwt(token, user) {
+            if (user) {
+                token.user = user;
+            }
+            return token;
+        },
+        async session({session, token}) {
+            console.log(token.token);
+            if (token.token.account.provider === 'google') {
+                try {
+                    const res = await axios.post(`${process.env.EXPRESS_SERVER}/auth/google-signin`,
+                        {idToken: token.token.account.id_token })
+                    if (res.status === 200) { // Successful request
+                        session.user.name = res.data.name;
+                        session.user.email = token.token.token.email;
+                        session.user.image = token.token.token.picture;
+                        session.user.role_type = res.data.role_type;
+                    }
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+            return session;
+        }
     }
-  }
+    //todo: Call back for email and password login
 });
 
-export {handler as GET, handler as POST };
+export { handler as GET, handler as POST };

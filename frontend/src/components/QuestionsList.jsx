@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import QuestionRow from './QuestionRow';
+import Link from 'next/link';
 import { getAllQuestions, deleteQuestion } from '@app/api/questionService';
 
 const QuestionTable = ({ questions, handleDelete }) => {
@@ -14,7 +14,75 @@ const QuestionTable = ({ questions, handleDelete }) => {
 
   return (
     <section id="question-list">
-      <table className="w-full mt-5">
+      <div className="relative overflow-x-auto mx-auto px-6 pb-10">
+        <table className="text-sm text-left w-full mx-auto">
+          <thead className="text-xs uppercase border-b ">
+            <tr>
+              {/* <th scope='col' className='px-1 py-3 w-0 font-medium'>
+                Attempted
+              </th> */}
+              <th scope="col" className="px-6 py-3 w-0 font-medium">
+                Title
+              </th>
+              <th scope="col" className="px-6 py-3 w-0 font-medium ">
+                Complexity
+              </th>
+              <th scope="col" className="px-6 py-3 w-0 font-medium">
+                Categories
+              </th>
+              <th scope="col" className="px-6 py-3 w-0 font-medium">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {questions.map((question, idx) => {
+              const colour =
+                question.complexity === 'Easy'
+                  ? 'text-green-500'
+                  : question.complexity === 'Medium'
+                  ? 'text-yellow-500'
+                  : 'text-red-500';
+              return (
+                <tr
+                  className={`${idx % 2 == 1 ? 'bg-gray-100' : ''}`}
+                  key={question.id}
+                >
+                  <td className="px-6 py-3">
+                    <Link
+                      className="hover:text-blue-600 cursor-pointer"
+                      href={`questions/${question._id}`}
+                    >
+                      {question.title}
+                    </Link>
+                  </td>
+                  <td className="px-6 py-3">
+                    <p className={`${colour}`}>{question.complexity}</p>
+                  </td>
+                  <td className="px-6 py-3">{question.categories}</td>
+                  <td className="px-6 py-3">
+                    <div className="flex space-x-4">
+                      <p
+                        className="font-inter text-sm cursor-pointer text-green-500"
+                        onClick={() => handleEdit(question._id)}
+                      >
+                        Edit
+                      </p>
+                      <p
+                        className="font-inter text-sm cursor-pointer text-orange-500"
+                        onClick={() => handleDelete(question._id)}
+                      >
+                        Delete
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {/* <table className="w-full mt-5">
         <thead>
           <tr>
             <th className="text-left">Title</th>
@@ -31,15 +99,15 @@ const QuestionTable = ({ questions, handleDelete }) => {
             />
           ))}
         </tbody>
-      </table>
+      </table> */}
     </section>
   );
 };
 
 const QuestionsList = () => {
-  const [searchText, setSearchText] = useState('');
+  // const [searchText, setSearchText] = useState('');
   const [questions, setQuestions] = useState([]);
-  const handleSearchChange = (e) => {};
+  // const handleSearchChange = (e) => {};
 
   // Get all questions as soon as page loads
   useEffect(() => {
@@ -75,7 +143,7 @@ const QuestionsList = () => {
 
   return (
     <section className="feed">
-      <form className="relative w-full flex-center">
+      {/* <form className="relative w-full flex-center">
         <input
           type="text"
           placeholder="Search question by title"
@@ -84,7 +152,7 @@ const QuestionsList = () => {
           required
           className="search_input peer mt-10"
         />
-      </form>
+      </form> */}
       <QuestionTable questions={questions} handleDelete={handleDelete} />
     </section>
   );

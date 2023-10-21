@@ -59,7 +59,9 @@ const QuestionTable = ({ questions, handleDelete }) => {
                   <td className="px-6 py-3">
                     <p className={`${colour}`}>{question.complexity}</p>
                   </td>
-                  <td className="px-6 py-3">{question.categories}</td>
+                  <td className="px-6 py-3">
+                    {question.categories.join(', ')}
+                  </td>
                   <td className="px-6 py-3">
                     <div className="flex space-x-4">
                       <p
@@ -82,24 +84,6 @@ const QuestionTable = ({ questions, handleDelete }) => {
           </tbody>
         </table>
       </div>
-      {/* <table className="w-full mt-5">
-        <thead>
-          <tr>
-            <th className="text-left">Title</th>
-            <th className="text-left">Complexity</th>
-            <th className="text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {questions.map((question) => (
-            <QuestionRow
-              question={question}
-              handleEdit={handleEdit}
-              handleDelete={handleDelete}
-            />
-          ))}
-        </tbody>
-      </table> */}
     </section>
   );
 };

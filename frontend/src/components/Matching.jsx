@@ -10,12 +10,7 @@ const socket = io.connect(process.env.NEXT_PUBLIC_MATCHING_SERVICE_URL);
 
 
 const Matching = ({ onMatch }) => {
-<<<<<<< HEAD
-  const router = useRouter();
-  
-=======
   const { data: session, status } = useSession();
->>>>>>> origin/master
   const [isConnected, setIsConnected] = useState(false);
   const [isMatched, setIsMatched] = useState(false);
   const [isFinding, setIsFinding] = useState(false);

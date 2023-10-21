@@ -1,7 +1,6 @@
 import { Schema, model } from 'mongoose';
 
 const QuestionSchema = new Schema({
-  // TODO: ref to user if needed
   title: {
     type: String,
     required: [true, 'Title is required'],

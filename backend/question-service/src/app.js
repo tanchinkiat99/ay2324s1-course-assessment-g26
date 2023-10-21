@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import questionRoutes from './routes/questionRoutes.js';
+import seedQuestions from './samples.js';
+import Question from './models/question.js';
 
 dotenv.config({ path: '.env.local' });
 
@@ -18,6 +20,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Seed database with sample questions
+async function seedDatabase() {
+  const count = await Question.countDocuments();
+
+  if (count === 0) {
+    await Question.insertMany(seedQuestions);
+    console.log('Database seeded with sample questions.');
+  }
+}
+
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI, {
@@ -27,6 +39,7 @@ mongoose
   })
   .then(() => {
     console.log('Connected to MongoDB');
+    return seedDatabase();
   })
   .catch((error) => {
     console.error('Could not connect to MongoDB', error);

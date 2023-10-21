@@ -49,7 +49,6 @@ const EditQuestion = () => {
     if (!questionId) return alert('No question ID provided');
 
     try {
-      // TODO: dont hardcode API here
       const response = await updateQuestion(questionId, post);
       router.push('/');
     } catch (error) {

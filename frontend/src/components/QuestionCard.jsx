@@ -70,10 +70,8 @@ const QuestionCard = ({ questionId }) => {
       : 'text-red-500';
 
   return (
-    <section className="w-full max-w-full flex flex-col">
-      <span className="flex font-semibold text-base text-lg">
-        {question.title}
-      </span>
+    <section className="w-1/2 overflow-auto">
+      <span className="font-semibold text-base text-lg">{question.title}</span>
       <div className={colour}>{question.complexity}</div>
       <div
         className="markdown"

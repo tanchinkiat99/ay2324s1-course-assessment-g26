@@ -1,7 +1,6 @@
 import Link from 'next/link';
 
 const QuestionForm = ({ type, post, setPost, submitting, handleSubmit }) => {
-  // TODO: adapt form from assignment 1 here
   // Reusable for update
   return (
     <section className="w-full max-w-full flex-start flex-col">

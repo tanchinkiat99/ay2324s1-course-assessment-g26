@@ -1,25 +1,39 @@
+import dedent from 'dedent';
+
 const seedQuestions = [
   {
     title: 'Reverse a String',
-    description: `
-    Write a function that reverses a string. The input string is given as an array of characters \`s\`.
-    You must do this by modifying the input array in-place with \`O(1)\` extra memory.
-    **Example 1**:
-    > Input: s = ["h","e","l","l","o"] 
-    > Output: ["o","l","l","e","h"] 
-    **Example 2**:
-    > Input: s = ["H","a","n","n","a","h"] 
-    > Output: ["h","a","n","n","a","H"]
-    **Constraints**:
-    - \`1 <= s.length <= 10<sup>5</sup>\` 
-    - \`s[i]\` is a printable ascii character
+    description: dedent`
+    **Write a function that reverses a string.** The input string is given as an array of characters \`s\`.
+    
+    You must do this by modifying the input array [in-place](https://en.wikipedia.org/wiki/In-place_algorithm) with \`O(1)\` extra memory.
+    
+    ---
+    
+    **Example 1:**
+    \`\`\`
+    Input: s = ["h","e","l","l","o"]
+    Output: ["o","l","l","e","h"]
+    \`\`\`
+    
+    **Example 2:**
+    \`\`\`
+    Input: s = ["H","a","n","n","a","h"]
+    Output: ["h","a","n","n","a","H"]
+    \`\`\`
+    
+    ---
+    
+    **Constraints:**
+    - \`1 <= s.length <= 10^5\`
+    - \`s[i]\` is a [printable ascii character](https://en.wikipedia.org/wiki/ASCII#Printable_characters).
     `,
     categories: ['Strings', 'Algorithms'],
     complexity: 'Easy',
   },
   {
     title: 'Linked List Cycle Detection',
-    description: `
+    description: dedent`
     Given \`head\`, the head of a linked list, determine if the linked list has a cycle in it.
     
     There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the \`next\` pointer. Internally, \`pos\` is used to denote the index of the node that tail's \`next\` pointer is connected to. **Note that \`pos\` is not passed as a parameter**.
@@ -75,7 +89,7 @@ const seedQuestions = [
   },
   {
     title: 'Roman to Integer',
-    description: `
+    description: dedent`
     Roman numerals are represented by seven different symbols: \`I\`, \`V\`, \`X\`, \`L\`, \`C\`, \`D\` and \`M\`.
     
     | **Symbol** | **Value** |
@@ -133,7 +147,7 @@ const seedQuestions = [
   },
   {
     title: 'Add Binary',
-    description: `
+    description: dedent`
     Given two binary strings \`a\` and \`b\`, return *their sum as a binary string*.
     
     ---
@@ -162,7 +176,7 @@ const seedQuestions = [
   },
   {
     title: 'Fibonacci Number',
-    description: `
+    description: dedent`
     The **Fibonacci numbers**, commonly denoted \`F(n)\` form a sequence, called the **Fibonacci sequence**, such that each number is the sum of the two preceding ones, starting from \`0\` and \`1\`. That is,
     
     \`\`\`
@@ -205,7 +219,7 @@ const seedQuestions = [
   },
   {
     title: 'Implement Stack using Queues',
-    description: `
+    description: dedent`
     Implement a last-in-first-out (LIFO) stack using only two queues. The implemented stack should support all the functions of a normal stack (\`push\`, \`top\`, \`pop\`, and \`empty\`).
     
     Implement the \`MyStack\` class:
@@ -253,7 +267,7 @@ const seedQuestions = [
   },
   {
     title: 'Combine Two Tables',
-    description: `
+    description: dedent`
     **Table: \`Person\`**
     
     | Column Name | Type    |

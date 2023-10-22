@@ -1,23 +1,16 @@
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 
-let ydoc;
-let wsProvider;
-let ytext;
-
 export function initYjs(room) {
-  if (!ydoc) {
-    ydoc = new Y.Doc();
-    wsProvider = new WebsocketProvider('ws://localhost:5555', room, ydoc);
-  }
-  if (!ytext) {
-    ytext = ydoc.getText('shared');
-  }
+  const ydoc = new Y.Doc();
+  const wsProvider = new WebsocketProvider('ws://localhost:5555', room, ydoc);
+  const ytext = ydoc.getText('shared');
+  return { ydoc, ytext };
 }
 
-export function getYText() {
-  if (!ytext) {
-    throw new Error("ytext has not been initialized. Please call initYjs first.");
-  }
-  return ytext;
-}
+// export function getYText() {
+//   if (!ytext) {
+//     throw new Error("ytext has not been initialized. Please call initYjs first.");
+//   }
+//   return ytext;
+// }

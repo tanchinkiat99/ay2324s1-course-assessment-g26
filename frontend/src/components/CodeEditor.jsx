@@ -4,12 +4,14 @@ import "ace-builds/src-noconflict/theme-monokai";
 import { useEffect, useRef } from 'react';
 import { initYjs, getYText } from '../utils/yjsSetup';
 
-export default function CodeEditor({ roomId = 'demo-room'}) {
+export default function CodeEditor({ roomId = 'demo-room' }) {
   const editorRef = useRef(null);
 
+  const { ydoc, ytext } = initYjs(roomId);
+
   useEffect(() => {
-    initYjs(roomId);
-    const ytext = getYText();
+    //initYjs(roomId);
+    //const ytext = getYText();
     let isSyncing = false; // Flag to check if syncing is ongoing
 
     // Initialize Ace Editor from Yjs
@@ -33,8 +35,12 @@ export default function CodeEditor({ roomId = 'demo-room'}) {
       ytext.insert(0, inputValue);  // Insert new text
       isSyncing = false; // Reset flag
     });
+
+    // return () => {
+    //   ydoc.destroy();
+    // };
    
-  }, [roomId]);
+  }, [roomId, ytext]);
 
   return (
     <ReactAce

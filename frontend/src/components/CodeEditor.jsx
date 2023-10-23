@@ -1,11 +1,12 @@
-import ReactAce from "react-ace";
-import "ace-builds/src-noconflict/mode-javascript";
-import "ace-builds/src-noconflict/theme-monokai";
+import ReactAce from 'react-ace';
+import 'ace-builds/src-noconflict/mode-javascript';
+import 'ace-builds/src-noconflict/theme-monokai';
 import { useEffect, useRef } from 'react';
 import { initYjs, getYText } from '@utils/yjsSetup';
 
 export default function CodeEditor({ roomId = 'demo-room' }) {
   const editorRef = useRef(null);
+  console.log(roomId);
 
   const { ydoc, ytext } = initYjs(roomId);
 
@@ -32,14 +33,13 @@ export default function CodeEditor({ roomId = 'demo-room' }) {
       isSyncing = true; // Set flag to true
       const inputValue = editor.getValue();
       ytext.delete(0, ytext.length); // Clear existing text
-      ytext.insert(0, inputValue);  // Insert new text
+      ytext.insert(0, inputValue); // Insert new text
       isSyncing = false; // Reset flag
     });
 
     // return () => {
     //   ydoc.destroy();
     // };
-   
   }, [roomId, ytext]);
 
   return (

@@ -104,11 +104,10 @@ router.post('/google-signin', async (req, res) => {
         const email = payload.email;
         const name = payload.name;
 
-        // Determine the role based on the request body (not in use – currently defaulting to user)
-        const userRole = 'user';
-
         let user = await getUserCompleteByEmail(email); // Check whether user exists in database
         if (!user) {
+            // Determine the role based on the request body (not in use – currently defaulting to user)
+            const userRole = 'user';
             user = await insertUser(email, name,null, payload.sub, 'google', userRole);
         }
 

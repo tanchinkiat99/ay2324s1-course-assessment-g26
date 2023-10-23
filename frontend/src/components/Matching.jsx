@@ -128,8 +128,8 @@ const Matching = ({ onMatch }) => {
       setOtherUser(data.other_user_username);
       onMatch(data.room_id);
 
-      console.log("Received room_id:", data.room_id);
-      router.push(`/collab-page/${data.room_id}`);
+      //console.log("Received room_id:", data.room_id);
+      //router.push(`/collab-page/${data.room_id}`);
       //router.push(`/questions/6533d92691995349640128f3`)
     });
 

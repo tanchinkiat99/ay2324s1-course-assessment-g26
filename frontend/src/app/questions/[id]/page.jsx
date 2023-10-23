@@ -6,7 +6,7 @@ import QuestionCard from '@components/QuestionCard';
 const page = ({ params }) => {
   return (
     <div> 
-      <Workspace questionId={params.id} />
+      <QuestionCard questionId={params.id} />
     </div>
   );
 };

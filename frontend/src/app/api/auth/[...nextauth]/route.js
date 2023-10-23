@@ -40,29 +40,24 @@ const handler = NextAuth({
     },
     secret: process.env.JWT_SECRET,
     callbacks: {
-        async jwt(token, user) {
-            if (user) {
-                token.user = user;
-            }
-            return token;
-        },
         async session({session, token}) {
-            console.log(token.token);
-            if (token.token.account.provider === 'google') {
-                try {
-                    const res = await axios.post(`${process.env.EXPRESS_SERVER}/auth/google-signin`,
-                        {idToken: token.token.account.id_token })
-                    if (res.status === 200) { // Successful request
-                        session.user.name = res.data.name;
-                        session.user.email = token.token.token.email;
-                        session.user.image = token.token.token.picture;
-                        session.user.role_type = res.data.role_type;
-                    }
-                } catch (error) {
-                    console.log(error)
+            try {
+                const user = {
+                    name: session.user.name,
+                    email: session.user.email,
+                    image: session.user.image
                 }
+                const res = await axios.post(`${process.env.EXPRESS_SERVER}/auth/signin-new`,
+                    {user: user })
+                if (res.status === 200) { // Successful request
+                    session.user.name = res.data.name;
+                    session.user.image = res.data.image;
+                    session.user.role_type = res.data.role_type;
+                }
+                return session;
+            } catch (error) {
+                console.log(error)
             }
-            return session;
         }
     }
     //todo: Call back for email and password login

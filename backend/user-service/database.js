@@ -66,18 +66,11 @@ export async function getUserPasswordByEmail(email) {
     return null;
 }
 
-export async function insertUser(email, name, password, google_id, auth_method, role_type) {
+export async function insertUser(email, name, image, user_role) {
     let result;
-    switch (auth_method) {
-        case "local":
-            const hashedPassword = await hashPassword(password);
-            result = await pool.query("INSERT INTO clientuser (email, name, password_hash, auth_method, role_type) VALUES ($1, $2, $3, 'local', $4)", [email, name, hashedPassword, role_type]);
-            break;
-        case "google":
-            result = await pool.query("INSERT INTO clientuser (email, name, google_id, auth_method, role_type) VALUES ($1, $2, $3, 'google', $4)", [email, name, google_id, role_type])
-            break;
 
-    }
+    result = await pool.query("INSERT INTO clientuser (email, name, image, user_role) VALUES ($1, $2, $3, $4)", [email, name, image, user_role])
+
     return result.rows[0];
 }
 

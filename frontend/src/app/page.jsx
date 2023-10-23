@@ -42,6 +42,7 @@ const Home = () => {
       </p>
       <QuestionsList />
       <Matching onMatch={onMatch} />
+        {session ? renderUserSession(session) : renderSignInButtons()}
     </section>
   );
 };

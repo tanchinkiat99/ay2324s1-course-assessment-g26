@@ -91,6 +91,26 @@ router.post('/signout', (req, res) => {
     res.status(200).json({ message: 'Logged out' });
 });
 
+router.post('/signin-new', async (req, res) => {
+
+    const {name, email, image} = req.body.user;
+
+    try {
+        let user = await getUserCompleteByEmail(email);
+        if (!user) {
+            const userRole = 'user'; // Set default user type created as user
+            user = await insertUser(email, name, image, userRole);
+        }
+
+        res.status(200).send({message: 'Login via Google successful', name: user.name,
+            email: user.email, image: user.image, role_type: user.user_role});
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({error: 'Google sign-in failed'});
+    }
+
+});
+
 router.post('/google-signin', async (req, res) => {
     const { idToken} = req.body;
 

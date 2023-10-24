@@ -33,7 +33,7 @@ const Home = () => {
           <p className="desc text-center">
             Browse the questions here and get matched
           </p>
-          <QuestionsList />
+          <QuestionsList role={session?.user.role} />
         </>
       ) : (
         <div className="flex flex-col items-center">

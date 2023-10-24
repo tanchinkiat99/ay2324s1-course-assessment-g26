@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getAllQuestions, deleteQuestion } from '@app/api/questionService';
 
-const QuestionTable = ({ questions, handleDelete }) => {
+const QuestionTable = ({ questions, handleDelete, role }) => {
   const router = useRouter();
 
   const handleEdit = (id) => {
@@ -30,9 +30,11 @@ const QuestionTable = ({ questions, handleDelete }) => {
               <th scope="col" className="px-6 py-3 w-0 font-medium">
                 Categories
               </th>
-              <th scope="col" className="px-6 py-3 w-0 font-medium">
-                Actions
-              </th>
+              {role == 'MAINTAINER' && (
+                <th scope="col" className="px-6 py-3 w-0 font-medium">
+                  Actions
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -62,22 +64,24 @@ const QuestionTable = ({ questions, handleDelete }) => {
                   <td className="px-6 py-3">
                     {question.categories.join(', ')}
                   </td>
-                  <td className="px-6 py-3">
-                    <div className="flex space-x-4">
-                      <p
-                        className="font-inter text-sm cursor-pointer text-green-500"
-                        onClick={() => handleEdit(question._id)}
-                      >
-                        Edit
-                      </p>
-                      <p
-                        className="font-inter text-sm cursor-pointer text-orange-500"
-                        onClick={() => handleDelete(question._id)}
-                      >
-                        Delete
-                      </p>
-                    </div>
-                  </td>
+                  {role == 'MAINTAINER' && (
+                    <td className="px-6 py-3">
+                      <div className="flex space-x-4">
+                        <p
+                          className="font-inter text-sm cursor-pointer text-green-500"
+                          onClick={() => handleEdit(question._id)}
+                        >
+                          Edit
+                        </p>
+                        <p
+                          className="font-inter text-sm cursor-pointer text-orange-500"
+                          onClick={() => handleDelete(question._id)}
+                        >
+                          Delete
+                        </p>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -88,7 +92,7 @@ const QuestionTable = ({ questions, handleDelete }) => {
   );
 };
 
-const QuestionsList = () => {
+const QuestionsList = ({ role }) => {
   // const [searchText, setSearchText] = useState('');
   const [questions, setQuestions] = useState([]);
   // const handleSearchChange = (e) => {};
@@ -137,7 +141,11 @@ const QuestionsList = () => {
           className="search_input peer mt-10"
         />
       </form> */}
-      <QuestionTable questions={questions} handleDelete={handleDelete} />
+      <QuestionTable
+        questions={questions}
+        handleDelete={handleDelete}
+        role={role}
+      />
     </section>
   );
 };

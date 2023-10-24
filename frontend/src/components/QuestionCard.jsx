@@ -18,20 +18,6 @@ const QuestionCard = ({ questionId }) => {
   useEffect(() => {
     const parseMarkdown = async (description) => {
       // Use remark to convert markdown into HTML string
-      let markdownString = `
-      Write a function that reverses a string. The input string is given as an array of characters \`s\`.
-      You must do this by modifying the input array in-place with \`O(1)\` extra memory.
-      **Example 1**:
-      > Input: s = ["h","e","l","l","o"] 
-      > Output: ["o","l","l","e","h"]
-      **Example 2**:
-      > Input: s = ["H","a","n","n","a","h"] 
-      > Output: ["h","a","n","n","a","H"]
-      **Constraints**:
-      - \`1 <= s.length <= 10^5\` 
-      - \`s[i]\` is a printable ascii character
-      `;
-
       const processedContent = await remark()
         .use(gfm)
         .use(html)
@@ -70,7 +56,7 @@ const QuestionCard = ({ questionId }) => {
       : 'text-red-500';
 
   return (
-    <section className="w-1/2 overflow-auto">
+    <section className="overflow-auto">
       <span className="font-semibold text-base text-lg">{question.title}</span>
       <div className={colour}>{question.complexity}</div>
       <div

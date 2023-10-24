@@ -20,8 +20,8 @@ const CollabPage = ({ params }) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Matching onMatch={onMatch} />
       {isMatched && <Workspace questionId={questionId} roomId={roomId} />}
+      <Matching onMatch={onMatch} />
     </div>
   );
 };

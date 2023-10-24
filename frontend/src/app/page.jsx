@@ -1,9 +1,6 @@
 'use client';
 
 import QuestionsList from '@components/QuestionsList';
-import Matching from '@components/Matching';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 const Home = () => {
   return (

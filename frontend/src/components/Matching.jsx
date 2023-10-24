@@ -1,20 +1,16 @@
 'use client';
 
-import { useRouter } from 'next/navigation'
-
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useSession } from 'next-auth/react';
+import Chatbox from './Chatbox';
 
 const socket = io.connect(process.env.NEXT_PUBLIC_MATCHING_SERVICE_URL);
 
-
 const Matching = ({ onMatch }) => {
-
-  const router = useRouter();
-
   const { data: session, status } = useSession();
   const [isConnected, setIsConnected] = useState(false);
+  const [roomId, setRoomId] = useState('');
   const [isMatched, setIsMatched] = useState(false);
   const [isFinding, setIsFinding] = useState(false);
   const [otherUser, setOtherUser] = useState('');
@@ -121,16 +117,13 @@ const Matching = ({ onMatch }) => {
     });
 
     socket.on('match_found', (data) => {
-      console.log(data.message);
+      console.log(data);
       setIsMatched(true);
       setIsFinding(false);
       setRunCountdown(false);
       setOtherUser(data.other_user_username);
-      onMatch(data.room_id);
-
-      //console.log("Received room_id:", data.room_id);
-      //router.push(`/collab-page/${data.room_id}`);
-      //router.push(`/questions/6533d92691995349640128f3`)
+      onMatch(data.room_id, data.question_id);
+      setRoomId(data.room_id);
     });
 
     socket.on('disconnect', () => {
@@ -162,7 +155,9 @@ const Matching = ({ onMatch }) => {
     };
   }, [socket]);
 
-  return !isAuthenticated() ? null : (
+  return !isAuthenticated() ? null : isMatched ? (
+    <Chatbox socket={socket} roomId={roomId} />
+  ) : (
     <div className="flex flex-col justify-center items-center p-2 m-1 bg-gray-50">
       <div className="font-bold mt-2 text-4xl text-center flex-1">
         Match with a friend!

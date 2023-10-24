@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useSession } from 'next-auth/react';
 
+import styles from '@styles/Chatbox.module.css';
+
 const Chatbox = ({ socket, roomId }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
@@ -18,6 +20,7 @@ const Chatbox = ({ socket, roomId }) => {
       message: message,
       room_id: roomId,
     });
+    setMessage(''); // clear message input
   };
 
   const receiveMessage = (newMessage) => {
@@ -26,10 +29,23 @@ const Chatbox = ({ socket, roomId }) => {
 
   const renderMessages = () => {
     return messages.map((data, index) => (
-      <div key={index}>
+      <div
+        key={index}
+        className={
+          data.username === user.name
+            ? styles.userMessage
+            : styles.otherMessage
+        }
+      >
         {data.username}: {data.message}
       </div>
     ));
+
+    // return messages.map((data, index) => (
+    //   <div key={index}>
+    //     {data.username}: {data.message}
+    //   </div>
+    // ));
   };
 
   useEffect(() => {
@@ -45,11 +61,11 @@ const Chatbox = ({ socket, roomId }) => {
 
   return (
     <div className="flex flex-col justify-center items-center p-2 m-1 bg-gray-50">
-      <div className="font-bold mt-2 text-4xl text-center flex-1">Chat:</div>
+      <div className="font-bold mt-2 text-4xl text-center flex-1">Room Chat:</div>
       <div className="flex flex-col justify-center items-center items-stretch">
         {renderMessages()}
       </div>
-      <input name="myInput" onChange={(e) => setMessage(e.target.value)} />
+      <input name="myInput" value={message} onChange={(e) => setMessage(e.target.value)} />
       <button
         className="border border-grey py-3 px-20 rounded-md m-3"
         onClick={sendMessage}

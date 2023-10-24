@@ -1,0 +1,15 @@
+.userMessage {
+    text-align: right;
+    background-color: #e6f7ff;
+    margin-left: 30%;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  
+  .otherMessage {
+    text-align: left;
+    background-color: #fff0f5;
+    margin-right: 30%;
+    padding: 10px;
+    border-radius: 10px;
+  }

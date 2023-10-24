@@ -3,16 +3,9 @@
 import QuestionsList from '@components/QuestionsList';
 import Matching from '@components/Matching';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const Home = () => {
-  // For the matching and collaboration service
-  const [roomId, setRoomId] = useState('');
-  const [isMatched, setIsMatched] = useState(false);
-  const onMatch = (roomId) => {
-    setRoomId(roomId);
-    setIsMatched(true);
-  };
-
   return (
     <section className="w-full flex-center flex-col">
       <h1 className="text-center text-5xl">
@@ -26,7 +19,6 @@ const Home = () => {
         Browse the questions here and get matched
       </p>
       <QuestionsList />
-      <Matching onMatch={onMatch} />
     </section>
   );
 };

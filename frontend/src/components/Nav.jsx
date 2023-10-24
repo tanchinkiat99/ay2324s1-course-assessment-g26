@@ -3,11 +3,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { signIn, signOut, useSession, getProviders } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const Nav = () => {
   // get session data after signin
   const { data: session } = useSession();
   const [providers, setProviders] = useState(null);
+  const router = useRouter();
+
   useEffect(() => {
     const setupProviders = async () => {
       const response = await getProviders();
@@ -31,6 +34,9 @@ const Nav = () => {
       <div className="sm:flex hidden">
         {session?.user ? (
           <div className="flex gap-3">
+            <Link href="/collab-page" className="outline_btn">
+              Match with a Peer!
+            </Link>
             <Link href="/add-question" className="black_btn">
               Create Question
             </Link>

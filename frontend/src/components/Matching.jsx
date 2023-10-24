@@ -1,12 +1,18 @@
 'use client';
 
+import { useRouter } from 'next/navigation'
+
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useSession } from 'next-auth/react';
 
 const socket = io.connect(process.env.NEXT_PUBLIC_MATCHING_SERVICE_URL);
 
+
 const Matching = ({ onMatch }) => {
+
+  const router = useRouter();
+
   const { data: session, status } = useSession();
   const [isConnected, setIsConnected] = useState(false);
   const [isMatched, setIsMatched] = useState(false);
@@ -121,6 +127,10 @@ const Matching = ({ onMatch }) => {
       setRunCountdown(false);
       setOtherUser(data.other_user_username);
       onMatch(data.room_id);
+
+      //console.log("Received room_id:", data.room_id);
+      //router.push(`/collab-page/${data.room_id}`);
+      //router.push(`/questions/6533d92691995349640128f3`)
     });
 
     socket.on('disconnect', () => {

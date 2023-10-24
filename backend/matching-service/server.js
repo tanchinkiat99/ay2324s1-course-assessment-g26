@@ -149,6 +149,13 @@ io.on('connection', (socket) => {
     });
   });
 
+  socket.on('send_message', (data) => {
+    io.to(data.room_id).emit('receive_message', {
+      username: data.username,
+      message: data.message,
+    });
+  });
+
   socket.on('disconnect', () => {
     socket.disconnect();
   });

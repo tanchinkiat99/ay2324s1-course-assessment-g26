@@ -8,11 +8,13 @@ import Workspace from '@components/Workspace';
 
 const CollabPage = ({ params }) => {
   // HARDCODED FOR NOW, WILL FETCH FROM SOMEWHERE LATER
-  const questionId = '6533d92691995349640128f3';
+  // const questionId = '6533d92691995349640128f3';
+  const [questionId, setQuestionId] = useState('');
   const [roomId, setRoomId] = useState('');
   const [isMatched, setIsMatched] = useState(false);
-  const onMatch = (roomId) => {
+  const onMatch = (roomId, questionId) => {
     setRoomId(roomId);
+    setQuestionId(questionId);
     setIsMatched(true);
   };
 

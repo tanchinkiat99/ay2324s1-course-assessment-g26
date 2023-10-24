@@ -117,12 +117,12 @@ const Matching = ({ onMatch }) => {
     });
 
     socket.on('match_found', (data) => {
-      console.log(data.message);
+      console.log(data);
       setIsMatched(true);
       setIsFinding(false);
       setRunCountdown(false);
       setOtherUser(data.other_user_username);
-      onMatch(data.room_id);
+      onMatch(data.room_id, data.question_id);
       setRoomId(data.room_id);
     });
 

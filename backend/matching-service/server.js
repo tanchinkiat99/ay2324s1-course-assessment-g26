@@ -19,6 +19,8 @@ const server = http.createServer(app);
 const MATCHING_SERVER_PORT = process.env.MATCHING_SERVER_PORT || 5001;
 const RABBITMQ_URL = `${process.env.RABBITMQ_URL}:${process.env.RABBITMQ_PORT}`;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const QUESTION_SERVICE_URL = process.env.QUESTION_SERVICE_URL;
+const QUESTION_SERVICE_ENDPOINT = `${QUESTION_SERVICE_URL}/questions`;
 
 const io = socketIO(server, {
   cors: {
@@ -121,6 +123,7 @@ io.on('connection', (socket) => {
           user_username: data.username,
           other_user_username: msgObj.other_user_username,
           room_id: msgObj.room_id,
+          question_id: msgObj.question_id,
         });
 
         // Join the new room
@@ -198,6 +201,8 @@ async function matchUsersInQueue(language, difficulty) {
       }
       const user2Details = JSON.parse(user2.content.toString());
 
+      const selectedQuestion = await getQuestionByDifficulty(difficulty);
+
       // Create a socket room and add to notifications queue
       const newRoomId = user1Details.socket_id + user2Details.socket_id;
       const newNotification1 = {
@@ -206,6 +211,7 @@ async function matchUsersInQueue(language, difficulty) {
         other_user_socket_id: user2Details.socket_id,
         other_user_username: user2Details.username,
         room_id: newRoomId,
+        question_id: selectedQuestion._id,
         difficulty: difficulty,
       };
       const newNotification2 = {
@@ -214,6 +220,7 @@ async function matchUsersInQueue(language, difficulty) {
         other_user_socket_id: user1Details.socket_id,
         other_user_username: user1Details.username,
         room_id: newRoomId,
+        question_id: selectedQuestion._id,
         difficulty: difficulty,
       };
 
@@ -236,6 +243,28 @@ async function matchUsersInQueue(language, difficulty) {
 async function cancelConsumer(consumer) {
   const consumerObj = await consumer;
   channel.cancel(consumerObj.consumerTag);
+}
+
+// Select a random question based on difficulty
+async function getQuestionByDifficulty(difficulty) {
+  try {
+    const response = await fetch(QUESTION_SERVICE_ENDPOINT);
+    const questions = await response.json();
+    const complexity =
+      difficulty === 'easy'
+        ? 'Easy'
+        : difficulty === 'medium'
+        ? 'Medium'
+        : 'Hard';
+    const filteredQuestions = questions.filter(
+      (question) => question.complexity === complexity
+    );
+    const randomQuestion =
+      filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
+    return randomQuestion;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 // Check for valid matches every 5 seconds

@@ -150,28 +150,4 @@ router.post('/google-signin', async (req, res) => {
     }
 });
 
-router.put('/updateProfile', verifyTokenFromCookie, async (req, res) => {
-    const { email, newName } = req.body;
-
-    try {
-        // Validate incoming data (more validation for production to prevent SQL injection)
-        if (!email || !newName) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
-
-        // Update name in the database
-        const result = updateUserName(email, newName);
-
-        if (result.rowCount === 0) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        return res.status(200).json({ message: 'Profile updated successfully', user: result.rows[0] });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-
 export default router;

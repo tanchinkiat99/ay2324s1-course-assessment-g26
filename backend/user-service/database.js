@@ -80,9 +80,9 @@ export async function updateUserPassword(email, password) {
     return result.rows[0];
 }
 
-export async function updateUserName(email, new_name) {
-    const result = await pool.query('UPDATE clientuser SET name = $1, modified_at = NOW() WHERE id = $2', [newName, userId]);
-    return results.rows[0]
+export async function updateUserName(email, newName) {
+    const result = await pool.query('UPDATE clientuser SET name = $1 WHERE email = $2', [newName, email]);
+    return result.rowCount > 0;
 }
 
 export async function deleteUser(email) {

@@ -1,7 +1,13 @@
 FROM node:18
 WORKDIR /app
-COPY package*.json ./
+
+#Install Dependency
+COPY package.json .
 RUN npm install
-COPY . .
+
+# Copy source code into Docker
+COPY . ./
+
 EXPOSE 5000
-CMD [ "node", "src/index.js" ]
+
+CMD ["node", "src/index.js"]

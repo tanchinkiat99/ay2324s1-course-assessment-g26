@@ -17,10 +17,10 @@ const server = http.createServer(app);
 
 // env variables
 const MATCHING_SERVER_PORT = process.env.MATCHING_SERVER_PORT || 5001;
-const RABBITMQ_URL = `${process.env.RABBITMQ_URL}:${process.env.RABBITMQ_PORT}`;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const QUESTION_SERVICE_URL = process.env.QUESTION_SERVICE_URL;
 const QUESTION_SERVICE_ENDPOINT = `${QUESTION_SERVICE_URL}/questions`;
+const RABBITMQ_URL = `amqp://${process.env.RABBITMQ_DOMAIN}`;
 
 const io = socketIO(server, {
   cors: {
@@ -67,6 +67,8 @@ connect();
 async function connect() {
   try {
     connection = await amqp.connect(RABBITMQ_URL);
+    // connection = await amqp.connect(`amqp://rabbitmq`);
+
     channel = await connection.createChannel();
 
     // Creates queues for matches and notifications
@@ -201,7 +203,7 @@ async function matchUsersInQueue(language, difficulty) {
       }
       const user2Details = JSON.parse(user2.content.toString());
 
-      const selectedQuestion = await getQuestionByDifficulty(difficulty);
+      const selectedQuestionId = await getQuestionIdByDifficulty(difficulty);
 
       // Create a socket room and add to notifications queue
       const newRoomId = user1Details.socket_id + user2Details.socket_id;
@@ -211,7 +213,7 @@ async function matchUsersInQueue(language, difficulty) {
         other_user_socket_id: user2Details.socket_id,
         other_user_username: user2Details.username,
         room_id: newRoomId,
-        question_id: selectedQuestion._id,
+        question_id: selectedQuestionId,
         difficulty: difficulty,
       };
       const newNotification2 = {
@@ -220,7 +222,7 @@ async function matchUsersInQueue(language, difficulty) {
         other_user_socket_id: user1Details.socket_id,
         other_user_username: user1Details.username,
         room_id: newRoomId,
-        question_id: selectedQuestion._id,
+        question_id: selectedQuestionId,
         difficulty: difficulty,
       };
 
@@ -246,7 +248,7 @@ async function cancelConsumer(consumer) {
 }
 
 // Select a random question based on difficulty
-async function getQuestionByDifficulty(difficulty) {
+async function getQuestionIdByDifficulty(difficulty) {
   try {
     const response = await fetch(QUESTION_SERVICE_ENDPOINT);
     const questions = await response.json();
@@ -261,9 +263,9 @@ async function getQuestionByDifficulty(difficulty) {
     );
     const randomQuestion =
       filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
-    return randomQuestion;
+    return randomQuestion._id;
   } catch (error) {
-    console.error(error);
+    return '6533d92691995349640128fa';
   }
 }
 
@@ -278,5 +280,7 @@ setInterval(async () => {
 }, 5000);
 
 server.listen(MATCHING_SERVER_PORT, () => {
-  console.log(`Matching server listening on port ${MATCHING_SERVER_PORT}`);
+  console.log(
+    `Matching server listening on port ${MATCHING_SERVER_PORT} with RabbitMQ running on: ${RABBITMQ_URL}`
+  );
 });

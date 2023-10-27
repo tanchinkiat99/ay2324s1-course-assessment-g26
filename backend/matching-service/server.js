@@ -20,11 +20,7 @@ const MATCHING_SERVER_PORT = process.env.MATCHING_SERVER_PORT || 5001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const QUESTION_SERVICE_URL = process.env.QUESTION_SERVICE_URL;
 const QUESTION_SERVICE_ENDPOINT = `${QUESTION_SERVICE_URL}/questions`;
-
-// If running matching-service locally
-// const RABBITMQ_URL = `amqp://${process.env.RABBITMQ_DOMAIN_LOCAL}:${process.env.RABBITMQ_PORT}`;
-// If running matching-service in Docker container
-const RABBITMQ_URL = `amqp://${process.env.RABBITMQ_SERVICE_NAME}`;
+const RABBITMQ_URL = `amqp://${process.env.RABBITMQ_DOMAIN}`;
 
 const io = socketIO(server, {
   cors: {

@@ -37,7 +37,7 @@ services:
     ports:
       - '5001:5001'
     env_file:
-      - ./matching-service/.env.local
+      - ./matching-service/.production.env
     depends_on:
       rabbitmq:
         condition: service_healthy

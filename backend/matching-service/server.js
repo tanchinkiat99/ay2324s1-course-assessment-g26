@@ -83,6 +83,9 @@ async function connect() {
   }
 }
 
+// Map of socket id to room id
+const SOCKET_TO_ROOM = {};
+
 io.on('connection', (socket) => {
   // When user requests to find a match
   socket.on('find_match', (data) => {
@@ -140,6 +143,9 @@ io.on('connection', (socket) => {
 
         // Update matched status
         isMatched = true;
+
+        // Store in local map
+        SOCKET_TO_ROOM[socket.id] = msgObj.room_id;
       }
     });
 
@@ -158,6 +164,20 @@ io.on('connection', (socket) => {
     io.to(data.room_id).emit('receive_message', {
       username: data.username,
       message: data.message,
+    });
+  });
+
+  socket.on('exit_room', (data) => {
+    // Remove entry from local storage
+    let roomId = '';
+    if (socket.id in SOCKET_TO_ROOM) {
+      roomId = SOCKET_TO_ROOM[socket.id];
+      delete SOCKET_TO_ROOM[socket.id];
+    }
+
+    console.log(data.username, 'exited room', roomId);
+    io.to(roomId).emit('user_exited_room', {
+      username: data.username,
     });
   });
 

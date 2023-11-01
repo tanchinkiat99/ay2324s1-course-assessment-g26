@@ -14,7 +14,7 @@ const Workspace = ({ questionId, roomId, language }) => {
     <div className="flex w-full h-screen">
       <QuestionCard questionId={questionId} />
       <div className="w-1/2">
-        <CodeEditor roomId={roomId} />
+        <CodeEditor roomId={roomId} language={language}/>
       </div>
     </div>
   );

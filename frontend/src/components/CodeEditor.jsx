@@ -1,13 +1,16 @@
 import ReactAce from 'react-ace';
 import 'ace-builds/src-noconflict/mode-javascript';
+import 'ace-builds/src-noconflict/mode-python';
+import 'ace-builds/src-noconflict/mode-java';
 import 'ace-builds/src-noconflict/theme-monokai';
+import 'ace-builds/src-noconflict/ext-language_tools';
 import { useEffect, useRef } from 'react';
 import { initYjs, getYText } from '@utils/yjsSetup';
 
-export default function CodeEditor({ roomId = 'demo-room' }) {
+export default function CodeEditor({ roomId = 'demo-room', language = 'python'}) {
   const editorRef = useRef(null);
-  console.log(roomId);
-
+  console.log("Code Editor is in room: " + roomId);
+  console.log("Code Editor is in language: " + language);
   const { ydoc, ytext } = initYjs(roomId);
 
   useEffect(() => {
@@ -23,7 +26,17 @@ export default function CodeEditor({ roomId = 'demo-room' }) {
     ytext.observe(() => {
       if (isSyncing) return; // Skip if we are currently syncing
       isSyncing = true; // Set flag to true
+
+      // Store cursor position and selection
+      const cursorPosition = editor.getCursorPosition();
+      const selection = editor.selection.toJSON();
+
       editor.setValue(ytext.toString());
+
+      // Restore cursor position and selection
+      editor.moveCursorToPosition(cursorPosition);
+      editor.selection.fromJSON(selection);
+
       isSyncing = false; // Reset flag
     });
 
@@ -44,11 +57,15 @@ export default function CodeEditor({ roomId = 'demo-room' }) {
 
   return (
     <ReactAce
-      mode="javascript"
+      //mode="python"
+      mode={language}
       theme="monokai"
       ref={editorRef}
       // your other ace editor options here
+      fontSize={14}
+      showPrintMargin={true}
+      showGutter={true}
+      highlightActiveLine={true}
     />
-    //<textarea ref={editorRef}></textarea> // Placeholder; replace this with your code editor component
   );
 }

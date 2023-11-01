@@ -122,7 +122,7 @@ const Matching = ({ onMatch }) => {
       setIsFinding(false);
       setRunCountdown(false);
       setOtherUser(data.other_user_username);
-      onMatch(data.room_id, data.question_id);
+      onMatch(data.room_id, data.question_id, data.language);
       setRoomId(data.room_id);
     });
 

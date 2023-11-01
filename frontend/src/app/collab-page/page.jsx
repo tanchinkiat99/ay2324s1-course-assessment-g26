@@ -8,7 +8,6 @@ import Workspace from '@components/Workspace';
 
 const CollabPage = ({ params }) => {
   // HARDCODED FOR NOW, WILL FETCH FROM SOMEWHERE LATER
-  // const questionId = '6533d92691995349640128f3';
   const [questionId, setQuestionId] = useState('');
   const [roomId, setRoomId] = useState('');
   const [language, setLanguage] = useState('python');

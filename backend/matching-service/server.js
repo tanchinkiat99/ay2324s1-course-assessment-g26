@@ -129,6 +129,7 @@ io.on('connection', (socket) => {
           other_user_username: msgObj.other_user_username,
           room_id: msgObj.room_id,
           question_id: msgObj.question_id,
+          language: msgObj.language,
         });
 
         // Join the new room
@@ -235,6 +236,7 @@ async function matchUsersInQueue(language, difficulty) {
         room_id: newRoomId,
         question_id: selectedQuestionId,
         difficulty: difficulty,
+        language: language,
       };
       const newNotification2 = {
         user_socket_id: user2Details.socket_id,
@@ -244,6 +246,7 @@ async function matchUsersInQueue(language, difficulty) {
         room_id: newRoomId,
         question_id: selectedQuestionId,
         difficulty: difficulty,
+        language: language,
       };
 
       // Send one notification for each user to the notifications queue

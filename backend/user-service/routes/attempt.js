@@ -2,17 +2,24 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import { addAttempt, getAttemptsByUser } from "../db/controllers/attemptController.js"
-import { validateAttemptRequest, checkQuestionExists } from "../middlewares/attemptMiddleware.js";
+import { body, validationResult } from 'express-validator';
+import { checkUserExists } from "../middlewares/userMiddleware.js";
+import { checkQuestionExists } from "../middlewares/attemptMiddleware.js";
 
 dotenv.config();
 const router = express.Router();
 
 // Create new question attempt by a user (A user is uniquely identified by their email)
-router.post('/:email', validateAttemptRequest, checkQuestionExists, async (req, res) => {
+router.post('/:email', body(['email', 'question_id', 'question_title', 'code']).notEmpty().escape(),
+    checkUserExists(), checkQuestionExists(), async (req, res) => {
     try {
+        const validationRes = validationResult(req);
+        if (!(validationRes.isEmpty())) { // If validation fails
+            res.status(400).json(validationRes.array()); // Return all error messages
+        }
         const { email, question_id, question_title, code} = req.body;
         const result = await addAttempt(email, question_id, question_title, code);
-        res.status(200).json({...result, message: `Attempt for question $\{question_id} by ${email} created successfully`})
+        res.status(200).json({message: `Attempt for question ${question_id} by ${email} created successfully`})
     } catch (error) {
         console.log(error);
         res.status(502).json({message: 'Internal Server Error'});
@@ -20,9 +27,14 @@ router.post('/:email', validateAttemptRequest, checkQuestionExists, async (req, 
 });
 
 // Get all attempts by a user
-router.get('/:email', async (req, res) => {
+router.get('/:email', body('email').notEmpty().isEmail().escape(), checkUserExists(), async (req, res) => {
     try {
-        const result = await getAttemptByUser(email);
+        const validationRes = validationResult(req);
+        if (!validationRes.isEmpty()) { // If validation fails
+            res.status(400).json(validationRes.array()); // Return all error messages
+        }
+        const { email } = req.body;
+        const result = await getAttemptsByUser(email);
         res.status(200).json(result);
     } catch (error) {
         console.log(error);

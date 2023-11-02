@@ -1,8 +1,12 @@
 //user-service/backend/routes/auth.js
+// Server
 import cookie from 'cookie';
 import dotenv from 'dotenv';
 import express from 'express';
+// Middleware
+import { body, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
+
 import { getUserByEmail, getUserCompleteByEmail, insertUser, updateUserName } from '../db/controllers/userController.js';
 import { OAuth2Client } from 'google-auth-library';
 
@@ -40,7 +44,13 @@ router.post('/signout', (req, res) => {
     res.status(200).json({ message: 'Logged out' });
 });
 
-router.post('/signin-new', async (req, res) => {
+router.post('/signin-new', body(['name', 'email', 'image']).notEmpty().escape(), body('email').isEmail(),
+    async (req, res) => {
+
+    const validationRes = validationResult(req);
+    if (!(validationRes.isEmpty())) { // If validation fails
+        res.status(400).json(validationRes.array()); // Return all error messages
+    }
 
     const {name, email, image} = req.body.user;
 
@@ -51,7 +61,7 @@ router.post('/signin-new', async (req, res) => {
             user = await insertUser(email, name, image, userRole);
         }
 
-        res.status(200).send({message: 'Login via Google successful', name: user.name,
+        res.status(200).send({message: `${user.email} successfully logged in by google`, name: user.name,
             email: user.email, image: user.image, role_type: user.user_role});
     } catch (error) {
         console.log(error);

@@ -1,7 +1,7 @@
-import { body } from "express-validator";
+import { param } from "express-validator";
 import { getUserByEmail } from '../db/controllers/userController.js';
 
-const checkUserExists = () => body('email')
+const checkUserExists = () => param('email')
     .notEmpty()
     .custom(async value => {
         const user = await getUserByEmail(value)

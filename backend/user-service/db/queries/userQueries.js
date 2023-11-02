@@ -31,11 +31,8 @@ async function getUserCompleteByEmail(email) {
 }
 
 async function insertUser(email, name, image, user_role) {
-    let result;
-
-    result = await pool.query("INSERT INTO clientuser (email, name, image, user_role) VALUES ($1, $2, $3, $4)", [email, name, image, user_role])
-
-    return result.rows[0];
+    const { rows } = await pool.query("INSERT INTO clientuser (email, name, image, user_role) VALUES ($1, $2, $3, $4)", [email, name, image, user_role])
+    return rows[0];
 }
 
 async function updateUserName(email, newName) {
@@ -44,8 +41,8 @@ async function updateUserName(email, newName) {
 }
 
 async function deleteUser(email) {
-    const result = await pool.query("DELETE FROM clientuser WHERE email = $1", [email]);
-    return result.rows[0];
+    const { rows } = await pool.query("DELETE FROM clientuser WHERE email = $1", [email]);
+    return rows[0];
 }
 
 export {

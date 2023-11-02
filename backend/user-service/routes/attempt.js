@@ -1,4 +1,4 @@
-//user-service/backend/routes/attemptController.js
+//user-service/backend/routes/attempt.js
 import dotenv from 'dotenv';
 import express from 'express';
 import { addAttempt, getAttemptsByUser } from "../db/controllers/attemptController.js"

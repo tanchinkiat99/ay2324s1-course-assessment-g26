@@ -3,7 +3,7 @@ import cookie from 'cookie';
 import dotenv from 'dotenv';
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { getUserByEmail, getUserCompleteByEmail, insertUser, updateUserName } from '../database.js';
+import { getUserByEmail, getUserCompleteByEmail, insertUser, updateUserName } from '../db/queries/userQueries.js';
 import { OAuth2Client } from 'google-auth-library';
 
 dotenv.config();

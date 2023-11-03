@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS clientuser (
     image VARCHAR(255)       NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS attempt (
+CREATE TABLE IF NOT EXISTS attempts (
     email VARCHAR(50),
     question_id VARCHAR(30),
     question_title VARCHAR(30),

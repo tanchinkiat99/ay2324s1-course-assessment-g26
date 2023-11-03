@@ -1,10 +1,10 @@
 //user-service/backend/routes/attempts.js
 import dotenv from 'dotenv';
 import express from 'express';
-import { addAttempt, getAttemptsByUser } from "../db/controllers/attemptController.js"
+import { addAttempt, getAttemptsByUser } from "../db/controllers/attemptsController.js"
 import { body, param, validationResult } from 'express-validator';
 import { checkUserExists } from "../middlewares/userMiddleware.js";
-import { checkQuestionExists } from "../middlewares/attemptMiddleware.js";
+import { checkQuestionExists } from "../middlewares/attemptsMiddleware.js";
 
 dotenv.config();
 const router = express.Router();

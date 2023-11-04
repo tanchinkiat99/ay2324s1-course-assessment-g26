@@ -122,7 +122,7 @@ const Matching = ({ onMatch }) => {
       setIsFinding(false);
       setRunCountdown(false);
       setOtherUser(data.other_user_username);
-      onMatch(data.room_id, data.question_id);
+      onMatch(data.room_id, data.question_id, data.language);
       setRoomId(data.room_id);
     });
 
@@ -139,6 +139,10 @@ const Matching = ({ onMatch }) => {
       console.log(data.message);
     });
 
+    socket.on('user_exited_room', (data) => {
+      alert(`${data.username} has left the room.`);
+    });
+
     // Reset connection if page is refreshed
     window.addEventListener('beforeunload', (e) => {
       console.log(e);
@@ -146,6 +150,9 @@ const Matching = ({ onMatch }) => {
     });
 
     return () => {
+      socket.emit('exit_room', {
+        username: user.name,
+      });
       socket.off('find_match');
       socket.off('finding_match');
       socket.off('match_found');

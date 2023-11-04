@@ -11,8 +11,7 @@ app.use(bodyParser.json());
 app.use('/auth', authRoute);
 app.use('/user', userRoute);
 
-
 const PORT = 3001;
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });

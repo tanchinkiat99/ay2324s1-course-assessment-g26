@@ -20,11 +20,7 @@ const MATCHING_SERVER_PORT = process.env.MATCHING_SERVER_PORT || 5001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const QUESTION_SERVICE_URL = process.env.QUESTION_SERVICE_URL;
 const QUESTION_SERVICE_ENDPOINT = `${QUESTION_SERVICE_URL}/questions`;
-
-// If running matching-service locally
-// const RABBITMQ_URL = `amqp://${process.env.RABBITMQ_DOMAIN_LOCAL}:${process.env.RABBITMQ_PORT}`;
-// If running matching-service in Docker container
-const RABBITMQ_URL = `amqp://${process.env.RABBITMQ_SERVICE_NAME}`;
+const RABBITMQ_URL = `amqp://${process.env.RABBITMQ_DOMAIN}`;
 
 const io = socketIO(server, {
   cors: {
@@ -87,6 +83,9 @@ async function connect() {
   }
 }
 
+// Map of socket id to room id
+const SOCKET_TO_ROOM = {};
+
 io.on('connection', (socket) => {
   // When user requests to find a match
   socket.on('find_match', (data) => {
@@ -130,6 +129,7 @@ io.on('connection', (socket) => {
           other_user_username: msgObj.other_user_username,
           room_id: msgObj.room_id,
           question_id: msgObj.question_id,
+          language: msgObj.language,
         });
 
         // Join the new room
@@ -144,6 +144,9 @@ io.on('connection', (socket) => {
 
         // Update matched status
         isMatched = true;
+
+        // Store in local map
+        SOCKET_TO_ROOM[socket.id] = msgObj.room_id;
       }
     });
 
@@ -162,6 +165,20 @@ io.on('connection', (socket) => {
     io.to(data.room_id).emit('receive_message', {
       username: data.username,
       message: data.message,
+    });
+  });
+
+  socket.on('exit_room', (data) => {
+    // Remove entry from local storage
+    let roomId = '';
+    if (socket.id in SOCKET_TO_ROOM) {
+      roomId = SOCKET_TO_ROOM[socket.id];
+      delete SOCKET_TO_ROOM[socket.id];
+    }
+
+    console.log(data.username, 'exited room', roomId);
+    io.to(roomId).emit('user_exited_room', {
+      username: data.username,
     });
   });
 
@@ -219,6 +236,7 @@ async function matchUsersInQueue(language, difficulty) {
         room_id: newRoomId,
         question_id: selectedQuestionId,
         difficulty: difficulty,
+        language: language,
       };
       const newNotification2 = {
         user_socket_id: user2Details.socket_id,
@@ -228,6 +246,7 @@ async function matchUsersInQueue(language, difficulty) {
         room_id: newRoomId,
         question_id: selectedQuestionId,
         difficulty: difficulty,
+        language: language,
       };
 
       // Send one notification for each user to the notifications queue

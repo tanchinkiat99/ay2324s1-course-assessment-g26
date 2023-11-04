@@ -1,10 +1,6 @@
 'use client';
 
 import QuestionsList from '@components/QuestionsList';
-import Matching from '@components/Matching';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { signIn, useSession, getProviders } from 'next-auth/react';
 
 const Home = () => {
   const { data: session } = useSession();

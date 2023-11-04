@@ -4,8 +4,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getAllQuestions, deleteQuestion } from '@app/api/questionService';
 
-const QuestionTable = ({ questions, handleDelete, role }) => {
+const QuestionTable = ({ questions, handleDelete, role_type }) => {
   const router = useRouter();
+  console.log(role_type);
 
   const handleEdit = (id) => {
     // Direct to edit form
@@ -30,7 +31,7 @@ const QuestionTable = ({ questions, handleDelete, role }) => {
               <th scope="col" className="px-6 py-3 w-0 font-medium">
                 Categories
               </th>
-              {role == 'MAINTAINER' && (
+              {role_type == 'maintainer' && (
                 <th scope="col" className="px-6 py-3 w-0 font-medium">
                   Actions
                 </th>
@@ -64,7 +65,7 @@ const QuestionTable = ({ questions, handleDelete, role }) => {
                   <td className="px-6 py-3">
                     {question.categories.join(', ')}
                   </td>
-                  {role == 'MAINTAINER' && (
+                  {role_type == 'maintainer' && (
                     <td className="px-6 py-3">
                       <div className="flex space-x-4">
                         <p
@@ -92,7 +93,7 @@ const QuestionTable = ({ questions, handleDelete, role }) => {
   );
 };
 
-const QuestionsList = ({ role }) => {
+const QuestionsList = ({ role_type }) => {
   // const [searchText, setSearchText] = useState('');
   const [questions, setQuestions] = useState([]);
   // const handleSearchChange = (e) => {};
@@ -144,7 +145,7 @@ const QuestionsList = ({ role }) => {
       <QuestionTable
         questions={questions}
         handleDelete={handleDelete}
-        role={role}
+        role_type={role_type}
       />
     </section>
   );

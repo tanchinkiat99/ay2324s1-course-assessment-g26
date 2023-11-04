@@ -1,11 +1,13 @@
 'use client';
 
 import QuestionsList from '@components/QuestionsList';
+import { useState, useEffect } from 'react';
+import { signIn, useSession, getProviders } from 'next-auth/react';
 
 const Home = () => {
   const { data: session } = useSession();
+  console.log(session?.user.role_type);
   const [providers, setProviders] = useState(null);
-  const router = useRouter();
 
   useEffect(() => {
     const setupProviders = async () => {
@@ -29,7 +31,7 @@ const Home = () => {
           <p className="desc text-center">
             Browse the questions here and get matched
           </p>
-          <QuestionsList role={session?.user.role} />
+          <QuestionsList role_type={session?.user.role_type} />
         </>
       ) : (
         <div className="flex flex-col items-center">
@@ -41,7 +43,7 @@ const Home = () => {
                 onClick={() => signIn(provider.id)}
                 className="big_btn"
               >
-                Sign In
+                Sign In with Google
               </button>
             ))}
         </div>

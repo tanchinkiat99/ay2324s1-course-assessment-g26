@@ -1,15 +1,14 @@
 'use client';
 
-import Workspace from '@components/Workspace';
 import QuestionCard from '@components/QuestionCard';
+import PrivateRoute from '@app/api/auth/[...nextauth]/PrivateRoute';
 
 const page = ({ params }) => {
   return (
-    <div> 
+    <div>
       <QuestionCard questionId={params.id} />
     </div>
   );
 };
 
-
-export default page;
+export default PrivateRoute(page);

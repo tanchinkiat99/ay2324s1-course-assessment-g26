@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import QuestionForm from '@components/QuestionForm';
 import { createQuestion } from '@app/api/questionService';
+import PrivateRoute from '@app/api/auth/[...nextauth]/PrivateRoute';
 
 const AddQuestion = () => {
   const router = useRouter();
@@ -41,4 +42,4 @@ const AddQuestion = () => {
   );
 };
 
-export default AddQuestion;
+export default PrivateRoute(AddQuestion);

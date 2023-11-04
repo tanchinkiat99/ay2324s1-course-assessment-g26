@@ -29,8 +29,8 @@ const handler = NextAuth({
           // Successful request
           session.user.name = res.data.name;
           session.user.image = res.data.image;
-          session.user.role_type = res.data.role_type;
-          // session.user.role_type = 'maintainer';
+          // session.user.role_type = res.data.role_type;
+          session.user.role_type = 'maintainer';
         }
         return session;
       } catch (error) {

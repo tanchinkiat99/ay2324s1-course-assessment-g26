@@ -6,7 +6,6 @@ import { getAllQuestions, deleteQuestion } from '@app/api/questionService';
 
 const QuestionTable = ({ questions, handleDelete, role_type }) => {
   const router = useRouter();
-  console.log(role_type);
 
   const handleEdit = (id) => {
     // Direct to edit form

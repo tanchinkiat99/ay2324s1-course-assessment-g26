@@ -1,10 +1,28 @@
 import axios from 'axios';
+import { getSession } from 'next-auth/react';
 
 // console.log('process.env', process.env.NEXT_PUBLIC_QUESTION_BACKEND_URL);
 const questionServiceClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_QUESTION_BACKEND_URL,
   // other custom settings
 });
+
+// // Add a request interceptor to include the token
+// questionServiceClient.interceptors.request.use(
+//   async (config) => {
+//     // Get the current session
+//     const session = await getSession();
+//     if (session) {
+//       // If there is a session, set the Authorization header
+//       config.headers.Authorization = `Bearer ${session.accessToken}`;
+//     }
+//     return config;
+//   },
+//   (error) => {
+//     // Do something with request error
+//     return Promise.reject(error);
+//   }
+// );
 
 export const getAllQuestions = async () => {
   const response = await questionServiceClient.get('/questions');

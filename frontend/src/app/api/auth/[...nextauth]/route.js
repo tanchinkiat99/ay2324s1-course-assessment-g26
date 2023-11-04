@@ -8,34 +8,66 @@ const handler = NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_ID,
       clientSecret: process.env.GOOGLE_SECRET,
+      // Prompts login again, allow for different account
+      authorization: {
+        params: {
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
+        },
+      },
     }),
   ],
-  database: process.env.SERVER,
+  // database: process.env.SERVER,
 
   secret: process.env.JWT_SECRET,
+  session: {
+    strategy: 'jwt',
+  },
   callbacks: {
-    async session({ session, token }) {
+    async signIn({ user, account, profile }) {
+      // The user will be passed to jwt on signin
+      const user_ = {
+        name: user.name,
+        email: user.email,
+        image: user.image,
+      };
+
       try {
-        const user = {
-          name: session.user.name,
-          email: session.user.email,
-          image: session.user.image,
-        };
         const res = await axios.post(
           `${process.env.EXPRESS_SERVER}/auth/signin-new`,
-          { user: user }
+          { user: user_ }
         );
         if (res.status === 200) {
           // Successful request
-          session.user.name = res.data.name;
-          session.user.image = res.data.image;
-          // session.user.role_type = res.data.role_type;
-          session.user.role_type = 'maintainer';
+          user.name = res.data.name;
+          user.image = res.data.image;
+          user.role_type = res.data.role_type;
+          // user.role_type = 'maintainer';
         }
-        return session;
+        return true;
       } catch (error) {
         console.log(error);
+        return false;
       }
+    },
+    async jwt({ token, user, session }) {
+      // Only returns user on signin which will be copied to token, subsequent user here is undefined
+      // console.log('jwt callback', { token, user, session });
+      if (user) {
+        // On signin
+        return {
+          ...token,
+          role_type: user.role_type,
+        };
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.role_type = token.role_type;
+      // console.log('session callback', { session, token });
+
+      return session;
     },
   },
   //todo: Call back for email and password login

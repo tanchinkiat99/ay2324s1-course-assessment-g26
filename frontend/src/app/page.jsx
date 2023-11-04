@@ -6,7 +6,9 @@ import { signIn, useSession, getProviders } from 'next-auth/react';
 
 const Home = () => {
   const { data: session } = useSession();
-  console.log(session?.user.role_type);
+  // console.log(session);
+  // console.log('JWT:', session?.accessToken);
+  // console.log(session?.accessToken);
   const [providers, setProviders] = useState(null);
 
   useEffect(() => {

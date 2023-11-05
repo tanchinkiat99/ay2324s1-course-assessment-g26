@@ -65,7 +65,7 @@ const handler = NextAuth({
     },
     async session({ session, token }) {
       session.user.role_type = token.role_type;
-      // console.log('session callback', { session, token });
+      // console.log({ token, session });
 
       return session;
     },

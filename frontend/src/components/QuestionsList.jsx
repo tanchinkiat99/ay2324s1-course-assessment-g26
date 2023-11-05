@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getAllQuestions, deleteQuestion } from '@app/api/questionService';
+import jwt from 'jsonwebtoken';
+import axios from 'axios';
 
 const QuestionTable = ({ questions, handleDelete, role_type }) => {
   const router = useRouter();
@@ -101,8 +103,8 @@ const QuestionsList = ({ role_type }) => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const data = await getAllQuestions();
-        setQuestions(data);
+        const response = await axios.get('/api/questions');
+        setQuestions(response.data);
       } catch (error) {
         console.error('Error:', error);
         console.error('Error Details:', error.response?.data);

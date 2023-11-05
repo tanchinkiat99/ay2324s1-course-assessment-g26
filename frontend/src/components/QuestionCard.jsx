@@ -5,8 +5,10 @@ import { useEffect, useState } from 'react';
 import { remark } from 'remark';
 import html from 'remark-html';
 import gfm from 'remark-gfm';
+import axios from 'axios';
 
 const QuestionCard = ({ questionId }) => {
+  const [error, setError] = useState('');
   const [question, setQuestion] = useState({
     title: '',
     description: '',
@@ -23,24 +25,24 @@ const QuestionCard = ({ questionId }) => {
         .use(html)
         .process(description);
       const contentHtml = processedContent.toString();
-      console.log(description);
-      console.log(contentHtml);
+      // console.log(description);
+      // console.log(contentHtml);
       setContentHtml(contentHtml);
     };
 
     const getQuestionDetails = async () => {
       try {
         // console.log({ questionId });
-        const data = await getQuestionById(questionId);
+        const res = await axios.get(`/api/questions/${questionId}`);
         setQuestion({
-          title: data.title,
-          description: data.description,
-          categories: data.categories,
-          complexity: data.complexity,
+          title: res.data.title,
+          description: res.data.description,
+          categories: res.data.categories,
+          complexity: res.data.complexity,
         });
-        parseMarkdown(data.description);
+        parseMarkdown(res.data.description);
       } catch (error) {
-        console.log(error);
+        setError(error.message);
       }
     };
 
@@ -57,6 +59,7 @@ const QuestionCard = ({ questionId }) => {
 
   return (
     <section className="overflow-auto">
+      {error && <p>{error}</p>}
       <span className="font-semibold text-base text-lg">{question.title}</span>
       <div className={colour}>{question.complexity}</div>
       <div

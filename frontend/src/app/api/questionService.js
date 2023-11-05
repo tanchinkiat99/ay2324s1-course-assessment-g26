@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getSession } from 'next-auth/react';
+import jwt from 'jsonwebtoken';
 
 // console.log('process.env', process.env.NEXT_PUBLIC_QUESTION_BACKEND_URL);
 const questionServiceClient = axios.create({
@@ -7,52 +7,52 @@ const questionServiceClient = axios.create({
   // other custom settings
 });
 
-// // Add a request interceptor to include the token
-// questionServiceClient.interceptors.request.use(
-//   async (config) => {
-//     // Get the current session
-//     const session = await getSession();
-//     if (session) {
-//       // If there is a session, set the Authorization header
-//       config.headers.Authorization = `Bearer ${session.accessToken}`;
-//     }
-//     return config;
-//   },
-//   (error) => {
-//     // Do something with request error
-//     return Promise.reject(error);
-//   }
-// );
-
-export const getAllQuestions = async () => {
-  const response = await questionServiceClient.get('/questions');
+export const getAllQuestions = async (roleType) => {
+  const response = await questionServiceClient.get('/questions', {
+    headers: {
+      Authorization: `Bearer ${roleType}`,
+    },
+  });
   if (response.status !== 200) {
     throw new Error(error.response?.data?.message);
   }
   return response.data;
 };
 
-export const getQuestionById = async (id) => {
-  const response = await questionServiceClient.get(`/questions/${id}`);
+export const getQuestionById = async (id, userToken) => {
+  const response = await questionServiceClient.get(`/questions/${id}`, {
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
+  });
   if (response.status !== 200) {
     throw new Error(error.response?.data?.message);
   }
   return response.data;
 };
 
-export const createQuestion = async (post) => {
-  const response = await questionServiceClient.post('/questions/new', post);
+export const createQuestion = async (post, userToken) => {
+  const response = await questionServiceClient.post('/questions/new', post, {
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
+  });
   if (response.status !== 201) {
     throw new Error(error.response?.data?.message);
   }
   return response.data;
 };
 
-export const updateQuestion = async (questionId, post) => {
+export const updateQuestion = async (questionId, post, userToken) => {
   try {
     const response = await questionServiceClient.patch(
       `/questions/${questionId}`,
-      post
+      post,
+      {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
     );
     return response.data;
   } catch (error) {
@@ -60,8 +60,12 @@ export const updateQuestion = async (questionId, post) => {
   }
 };
 
-export const deleteQuestion = async (id) => {
-  const response = await questionServiceClient.delete(`/questions/${id}`);
+export const deleteQuestion = async (id, userToken) => {
+  const response = await questionServiceClient.delete(`/questions/${id}`, {
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
+  });
   if (response.status !== 200) {
     throw new Error(error.response?.data?.message);
   }

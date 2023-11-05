@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import questionRoutes from './routes/questionRoutes.js';
 import seedQuestions from './samples.js';
 import Question from './models/question.js';
+import { verifyRole } from './middlewares/verifyRole.js';
 
 const envPath = process.env.NODE_ENV === 'development' ? '.env.local' : '.env';
 dotenv.config({ path: envPath });

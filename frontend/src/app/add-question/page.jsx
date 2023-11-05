@@ -23,7 +23,7 @@ const AddQuestion = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const res = await fetch('/api/create-question', {
+      const res = await fetch('/api/add-question', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

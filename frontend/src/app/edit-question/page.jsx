@@ -4,7 +4,8 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import QuestionForm from '@components/QuestionForm';
 import { getQuestionById, updateQuestion } from '@app/api/questionService';
-import PrivateRoute from '@app/api/auth/[...nextauth]/PrivateRoute';
+import MaintainerRoute from '@app/api/auth/[...nextauth]/MaintainerRoute';
+import axios from 'axios';
 
 const EditQuestion = () => {
   const router = useRouter();
@@ -25,13 +26,13 @@ const EditQuestion = () => {
     // Fill in form with question details
     const getQuestionDetails = async () => {
       try {
-        const data = await getQuestionById(questionId);
-        console.log(data);
+        const res = await axios.get(`/api/questions/${questionId}`);
+        // console.log(res.data);
         setPost({
-          title: data.title,
-          description: data.description,
-          categories: data.categories,
-          complexity: data.complexity,
+          title: res.data.title,
+          description: res.data.description,
+          categories: res.data.categories,
+          complexity: res.data.complexity,
         });
       } catch (error) {
         console.log(error);
@@ -50,7 +51,16 @@ const EditQuestion = () => {
     if (!questionId) return alert('No question ID provided');
 
     try {
-      const response = await updateQuestion(questionId, post);
+      const response = await fetch('/api/edit-question', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: questionId,
+          ...post,
+        }),
+      });
       router.push('/');
     } catch (error) {
       console.log(error);
@@ -70,4 +80,4 @@ const EditQuestion = () => {
   );
 };
 
-export default PrivateRoute(EditQuestion);
+export default MaintainerRoute(EditQuestion);

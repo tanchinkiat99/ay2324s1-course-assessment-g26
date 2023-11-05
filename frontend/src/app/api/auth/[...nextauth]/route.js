@@ -42,8 +42,8 @@ const handler = NextAuth({
           // Successful request
           user.name = res.data.name;
           user.image = res.data.image;
-          user.role_type = res.data.role_type;
-          // user.role_type = 'maintainer';
+          // user.role_type = res.data.role_type;
+          user.role_type = 'maintainer';
         }
         return true;
       } catch (error) {

@@ -120,7 +120,15 @@ const QuestionsList = ({ role_type }) => {
     const confirmed = confirm('Are you sure you want to delete this question?');
     if (confirmed) {
       try {
-        await deleteQuestion(id);
+        const response = await fetch('/api/delete-question', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: id,
+          }),
+        });
         const filteredQuestions = questions.filter(
           (question) => question._id !== id
         );

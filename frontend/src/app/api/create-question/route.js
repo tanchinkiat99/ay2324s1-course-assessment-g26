@@ -3,7 +3,6 @@ import { getToken } from 'next-auth/jwt';
 import jwt from 'jsonwebtoken';
 
 export async function POST(req, res) {
-  console.log('CORRECT ROUTE');
   const token = await getToken({
     req: req,
     secret: process.env.NEXTAUTH_SECRET,

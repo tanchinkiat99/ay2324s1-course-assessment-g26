@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-export const verifyRole = (role) => (req, res, next) => {
+export const verifyRole = (roles) => (req, res, next) => {
   // console.log('VERIFYING');
   try {
     if (!req.headers.authorization) {
@@ -12,7 +12,7 @@ export const verifyRole = (role) => (req, res, next) => {
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // console.log(decoded.role);
-    if (decoded.role == role) {
+    if (roles.includes(decoded.role)) {
       next();
     } else {
       res.status(403).json({ message: 'Insufficient permissions' });

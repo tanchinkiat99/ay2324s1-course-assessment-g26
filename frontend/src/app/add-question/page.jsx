@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import QuestionForm from '@components/QuestionForm';
 import { createQuestion } from '@app/api/questionService';
 import PrivateRoute from '@app/api/auth/[...nextauth]/PrivateRoute';
+import axios from 'axios';
 
 const AddQuestion = () => {
   const router = useRouter();
@@ -22,7 +23,15 @@ const AddQuestion = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await createQuestion(post);
+      const res = await fetch('/api/create-question', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...post,
+        }),
+      });
       router.push('/');
     } catch (error) {
       console.log(error);

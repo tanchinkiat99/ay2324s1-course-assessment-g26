@@ -34,8 +34,8 @@ const router = express.Router();
 // });
 
 router.post('/new', verifyRole('maintainer'), createQuestion);
-router.get('/', verifyRole('user'), getAllQuestions);
-router.get('/:id', verifyRole('user'), getQuestionById);
+router.get('/', verifyRole(['user', 'maintainer']), getAllQuestions);
+router.get('/:id', verifyRole(['user', 'maintainer']), getQuestionById);
 router.patch('/:id', verifyRole('maintainer'), updateQuestion);
 router.delete('/:id', verifyRole('maintainer'), deleteQuestion);
 

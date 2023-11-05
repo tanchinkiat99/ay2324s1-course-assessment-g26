@@ -122,7 +122,7 @@ const Matching = ({ onMatch }) => {
       setIsFinding(false);
       setRunCountdown(false);
       setOtherUser(data.other_user_username);
-      onMatch(data.room_id, data.question_id, data.language);
+      onMatch(socket, data.room_id, data.question_id, data.language);
       setRoomId(data.room_id);
     });
 
@@ -162,9 +162,35 @@ const Matching = ({ onMatch }) => {
     };
   }, [socket]);
 
-  return !isAuthenticated() ? null : isMatched ? (
-    <Chatbox socket={socket} roomId={roomId} />
-  ) : (
+  // return !isAuthenticated() ? null : isMatched ? (
+  //   <Chatbox socket={socket} roomId={roomId} />
+  // ) : (
+  //   <div className="flex flex-col justify-center items-center p-2 m-1 bg-gray-50">
+  //     <div className="font-bold mt-2 text-4xl text-center flex-1">
+  //       Match with a friend!
+  //     </div>
+  //     <div className="flex flex-row justify-center items-center items-stretch">
+  //       {renderDifficultyOptions()}
+  //       {renderLanguageOptions()}
+  //     </div>
+  //     <button
+  //       className={
+  //         'border border-grey py-3 px-20 rounded-md m-3 font-semibold text-xl ' +
+  //         (isFinding || isMatched
+  //           ? 'cursor-not-allowed opacity-50'
+  //           : 'bg-green-100')
+  //       }
+  //       onClick={requestToFindMatch}
+  //       disabled={isFinding || isMatched}
+  //     >
+  //       {clickHereButtonText}
+  //     </button>
+  //     {renderMatchStatus()}
+  //     {renderCountdownTimer()}
+  //   </div>
+  // );
+
+  return !isAuthenticated() || isMatched ? null : (
     <div className="flex flex-col justify-center items-center p-2 m-1 bg-gray-50">
       <div className="font-bold mt-2 text-4xl text-center flex-1">
         Match with a friend!
@@ -189,6 +215,7 @@ const Matching = ({ onMatch }) => {
       {renderCountdownTimer()}
     </div>
   );
+
 };
 
 export default Matching;

@@ -1,9 +1,9 @@
-//user-service/backend/routes/auth.js
+//backend/user-service/routes/auth.js
 import cookie from 'cookie';
 import dotenv from 'dotenv';
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { getUserByEmail, getUserCompleteByEmail, insertUser, updateUserName } from '../database.js';
+import { getUserByEmail, getUserCompleteByEmail, insertUser, updateUserName } from '../db/controllers/userController.js';
 import { OAuth2Client } from 'google-auth-library';
 
 dotenv.config();

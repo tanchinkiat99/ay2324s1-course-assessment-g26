@@ -192,19 +192,19 @@ const Matching = ({ onMatch }) => {
 
   return !isAuthenticated() || isMatched ? null : (
     <div className="flex flex-col justify-center items-center p-2 m-1 bg-gray-50">
-      <div className="font-bold mt-2 text-4xl text-center flex-1">
+      <div className="font-bold text-4xl text-center my-10">
         Match with a friend!
       </div>
-      <div className="flex flex-row justify-center items-center items-stretch">
+      <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-4">
         {renderDifficultyOptions()}
         {renderLanguageOptions()}
       </div>
       <button
         className={
-          'border border-grey py-3 px-20 rounded-md m-3 font-semibold text-xl ' +
+          'border border-grey py-2 px-16 rounded-md my-2 font-semibold text-lg ' +
           (isFinding || isMatched
             ? 'cursor-not-allowed opacity-50'
-            : 'bg-green-100')
+            : 'bg-green-100 hover:bg-green-200')
         }
         onClick={requestToFindMatch}
         disabled={isFinding || isMatched}

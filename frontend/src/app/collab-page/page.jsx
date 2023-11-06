@@ -35,7 +35,7 @@ const CollabPage = ({ params }) => {
   // );
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col lg:flex-row w-full h-screen">
+      <div className="flex flex-col lg:flex-row w-full h-full justify-center items-center">
         {isMatched && (
           <Workspace
             questionId={questionId}

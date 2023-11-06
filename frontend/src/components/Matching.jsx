@@ -93,6 +93,16 @@ const Matching = ({ onMatch }) => {
     return runCountdown ? <div>{countdown}</div> : null;
   };
 
+  const disconnect = () => {
+    socket.emit('exit_room');
+    socket.off('find_match');
+    socket.off('finding_match');
+    socket.off('match_found');
+    socket.off('user_joined_room');
+    socket.off('room_message');
+    socket.disconnect();
+  };
+
   useEffect(() => {
     if (runCountdown) {
       if (countdown <= 0) {
@@ -145,21 +155,11 @@ const Matching = ({ onMatch }) => {
 
     // Reset connection if page is refreshed
     window.addEventListener('beforeunload', (e) => {
-      console.log(e);
-      socket.disconnect();
+      disconnect();
+      // socket.disconnect();
     });
 
-    return () => {
-      socket.emit('exit_room', {
-        username: user.name,
-      });
-      socket.off('find_match');
-      socket.off('finding_match');
-      socket.off('match_found');
-      socket.off('user_joined_room');
-      socket.off('room_message');
-      socket.disconnect();
-    };
+    return disconnect;
   }, [socket]);
 
   return !isAuthenticated() ? null : isMatched ? (

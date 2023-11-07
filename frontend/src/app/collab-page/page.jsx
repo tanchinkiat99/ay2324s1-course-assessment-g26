@@ -36,19 +36,14 @@ const CollabPage = ({ params }) => {
   // );
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col lg:flex-row w-full h-full justify-center items-center">
-        {isMatched && (
-          <Workspace
-            questionId={questionId}
-            roomId={roomId}
-            language={language}
-          />
-        )}
-        <Matching onMatch={onMatch} isMatched={isMatched} />
-        {isMatched && socket && roomId && (
-          <Chatbox socket={socket} roomId={roomId} />
-        )}
-      </div>
+      {isMatched && (
+        <Workspace
+          questionId={questionId}
+          roomId={roomId}
+          language={language}
+        />
+      )}
+      <Matching onMatch={onMatch} />
     </div>
   );
 };

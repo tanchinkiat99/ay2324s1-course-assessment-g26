@@ -16,13 +16,12 @@ const handler = NextAuth({
   callbacks: {
     async session({session, token}) {
       try {
-        const user = {
-          name: session.user.name,
-          email: session.user.email,
-          image: session.user.image
-        }
         const res = await axios.post(`${process.env.EXPRESS_SERVER}/auth/signin-new`,
-            {user: user })
+            {
+              name: session.user.name,
+              email: session.user.email,
+              image: session.user.image
+            });
         if (res.status === 200) { // Successful request
           session.user.name = res.data.name;
           session.user.image = res.data.image;

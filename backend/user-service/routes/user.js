@@ -8,7 +8,9 @@ dotenv.config();
 const router = express.Router();
 router.put('/:email', param('email').notEmpty().isEmail().escape(), checkUserExists(),
     body('name').notEmpty().escape(), async (req, res) => {
-    const { email, name } = req.body;
+    const { name } = req.body;
+    const { email } = req.params;
+    console.log(`Received request to update user ${email}'s name to ${name}`);
 
     try {
         const validationRes = validationResult(req);
@@ -20,10 +22,10 @@ router.put('/:email', param('email').notEmpty().isEmail().escape(), checkUserExi
         const isUpdated = await updateUserName(email, name);
         if (isUpdated) {
             console.log("User:", email, "updated successfully")
-            return res.status(200).json({ message: 'Profile updated successfully' });
+            res.status(200).json({ message: 'Profile updated successfully' });
         } else {
             console.log("User:", email, "not found") // Redundant error checking
-            return res.status(404).json({error: 'User not found'});
+            res.status(404).json({error: 'User not found'});
         }
 
         } catch (err) {

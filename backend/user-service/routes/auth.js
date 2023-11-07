@@ -7,7 +7,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 
-import { getUserByEmail, getUserCompleteByEmail, insertUser, updateUserName } from '../db/controllers/userController.js';
+import { getUserCompleteByEmail, insertUser } from '../db/controllers/userController.js';
 import { OAuth2Client } from 'google-auth-library';
 
 dotenv.config();
@@ -52,7 +52,7 @@ router.post('/signin-new', body(['name', 'email', 'image']).notEmpty().escape(),
         res.status(400).json(validationRes.array()); // Return all error messages
     }
 
-    const {name, email, image} = req.body.user;
+    const { name, email, image } = req.body;
 
     try {
         let user = await getUserCompleteByEmail(email);

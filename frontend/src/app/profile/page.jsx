@@ -2,8 +2,8 @@
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
-import axios from 'axios';
 import PrivateRoute from '@app/api/auth/[...nextauth]/PrivateRoute';
+import { updateUser } from '@app/api/userService';
 //import { useRouter } from 'next/authentication';
 
 import Profile from '@components/Profile';
@@ -28,14 +28,12 @@ const ProfilePage = () => {
 
   const handleSubmit = async () => {
     try {
-      console.log(formData);
-      const res = await axios.put(
-        `${process.env.EXPRESS_SERVER}/user/edit`,
-        formData
-      );
+      session.user.name = formData.name;
+      const res = await updateUser(formData.email, formData.name);
       if (res.status === 200) {
         setErrorMessage(null);
         setSuccessMessage('Profile updated successfully');
+        setEditMode(false);
       }
     } catch (error) {
       setSuccessMessage(null);

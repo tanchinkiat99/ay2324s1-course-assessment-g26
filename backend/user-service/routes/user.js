@@ -16,7 +16,7 @@ router.put('/:email', param('email').notEmpty().isEmail().escape(), checkUserExi
     try {
         const validationRes = validationResult(req);
         if (!(validationRes.isEmpty())) { // If validation fails
-            res.status(400).json(validationRes.array()); // Return all error messages
+            return res.status(400).json(validationRes.array()); // Return all error messages
         }
 
         // Update name in the database
@@ -31,7 +31,7 @@ router.put('/:email', param('email').notEmpty().isEmail().escape(), checkUserExi
 
         } catch (err) {
         console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
@@ -58,7 +58,7 @@ router.delete('/:email', param('email').notEmpty().isEmail().escape(), checkUser
 
         } catch (err) {
             console.error(err);
-            return res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Internal Server Error' });
         }
     });
 

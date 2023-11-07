@@ -43,12 +43,12 @@ router.post('/signout', (req, res) => {
     res.status(200).json({ message: 'Logged out' });
 });
 
-router.post('/signin-new', body(['name', 'email', 'image']).notEmpty().escape(), body('email').isEmail(),
+router.post('/signin-new', body(['name', 'email']).notEmpty().escape(), body('image').notEmpty(), body('email').isEmail(),
     async (req, res) => {
 
     const validationRes = validationResult(req);
     if (!(validationRes.isEmpty())) { // If validation fails
-        res.status(400).json(validationRes.array()); // Return all error messages
+        return res.status(400).json(validationRes.array()); // Return all error messages
     }
 
     const { name, email, image } = req.body;

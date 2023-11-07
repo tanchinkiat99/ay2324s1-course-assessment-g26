@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
-import { useSession } from 'next-auth/react';
-import { useState } from 'react';
+import {signOut, useSession} from 'next-auth/react';
+import { useState, useEffect } from 'react';
 import PrivateRoute from '@app/api/auth/[...nextauth]/PrivateRoute';
 import {deleteUser, updateUser} from '@app/api/userService';
 //import { useRouter } from 'next/authentication';
@@ -10,13 +10,14 @@ import Profile from '@components/Profile';
 
 const ProfilePage = () => {
   const { data: session } = useSession();
+  const router = useRouter();
   // States to control display of edit form
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
     name: session?.user.name || '',
     email: session?.user.email,
   });
-  // State to control the display of the confirmation dialog
+  // State to control the display of the confirmation dialog for deleting profile
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
   // States to control message dialogues (not in use)
   const [successMessage, setSuccessMessage] = useState(null);

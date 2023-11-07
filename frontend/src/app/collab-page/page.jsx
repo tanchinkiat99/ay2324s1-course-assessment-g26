@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Matching from '@components/Matching';
+import PrivateRoute from '@app/api/auth/[...nextauth]/PrivateRoute';
 
 import Workspace from '@components/Workspace';
 
@@ -33,4 +34,4 @@ const CollabPage = ({ params }) => {
   );
 };
 
-export default CollabPage;
+export default PrivateRoute(CollabPage);

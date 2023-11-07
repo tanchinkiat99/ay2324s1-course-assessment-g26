@@ -2,11 +2,13 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 dotenv.config({path: '.env'});
 
 const app = express();
 
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 const openai = new OpenAI({ key: process.env.OPENAI_API_KEY});
@@ -21,8 +23,8 @@ app.post('/', async function (req, res) {
      model: "gpt-4",
      messages: [{ role: 'user', content: query }],
     });
-    const reply = response.choices[0].message.content;
-    res.send(reply);
+    const reply = {message: response.choices[0].message.content}
+    res.send(JSON.stringify(reply));
 });
 
 const port = process.env.PORT || 4444;

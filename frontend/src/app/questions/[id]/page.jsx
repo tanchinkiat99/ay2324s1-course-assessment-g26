@@ -5,7 +5,7 @@ import PrivateRoute from '@app/api/auth/[...nextauth]/PrivateRoute';
 
 const page = ({ params }) => {
   return (
-    <div>
+    <div className="flex justify-center">
       <QuestionCard questionId={params.id} />
     </div>
   );

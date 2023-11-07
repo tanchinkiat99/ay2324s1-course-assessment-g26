@@ -1,6 +1,7 @@
+//backend/user-service/routes/user.js
 import dotenv from "dotenv";
 import express from "express";
-import { updateUserName } from '../database.js';
+import { updateUserName } from '../db/controllers/userController.js';
 
 dotenv.config();
 const router = express.Router();

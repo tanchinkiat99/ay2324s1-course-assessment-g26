@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import authRoute from './routes/auth.js';
 import userRoute from './routes/user.js';
-import attemptRoute from './routes/attempt.js'
+import attemptsRoute from './routes/attempts.js'
 
 const app = express();
 app.use(cors());
@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 
 app.use('/auth', authRoute);
 app.use('/user', userRoute);
-app.use('/attempts', attemptRoute);
+app.use('/attempts', attemptsRoute);
 
 const PORT = 3001;
 app.listen(PORT, () => {

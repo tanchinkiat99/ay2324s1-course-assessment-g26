@@ -1,5 +1,4 @@
-//user-service/backend/routes/auth.js
-// Server
+//backend/user-service/routes/auth.js
 import cookie from 'cookie';
 import dotenv from 'dotenv';
 import express from 'express';

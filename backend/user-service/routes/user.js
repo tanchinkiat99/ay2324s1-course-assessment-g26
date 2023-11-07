@@ -1,3 +1,4 @@
+//backend/user-service/routes/user.js
 import dotenv from "dotenv";
 import express from "express";
 import { updateUserName, deleteUser } from '../db/controllers/userController.js';

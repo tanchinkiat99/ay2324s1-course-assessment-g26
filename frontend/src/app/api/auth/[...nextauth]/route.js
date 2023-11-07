@@ -16,6 +16,7 @@ const handler = NextAuth({
   callbacks: {
     async session({session, token}) {
       try {
+        console.log(`User's image: ${session.user.image}`);
         const res = await axios.post(`${process.env.EXPRESS_SERVER}/auth/signin-new`,
             {
               name: session.user.name,

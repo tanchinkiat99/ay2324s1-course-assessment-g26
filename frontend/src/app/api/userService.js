@@ -16,3 +16,13 @@ export const updateUser = async (email, name) => {
         throw new Error(error.response?.data?.message);
     }
 };
+
+export const deleteUser = async (email) => {
+    try {
+        const response = await userServiceClient.delete(
+            `user/${email}`);
+        return response;
+    } catch (error) {
+        throw new Error(error.response?.data?.message);
+    }
+}

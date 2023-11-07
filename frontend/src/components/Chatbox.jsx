@@ -7,8 +7,7 @@ import { useSession } from 'next-auth/react';
 import styles from '@styles/Chatbox.module.css';
 
 const Chatbox = ({ socket, roomId }) => {
-
-  const [isChatOpen, setIsChatOpen] = useState(false); 
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [isAiChat, setIsAiMode] = useState(false);
   const [Ai_index, setIndex] = useState(0);
   const [q_message, setQuery] = useState('');
@@ -42,9 +41,7 @@ const Chatbox = ({ socket, roomId }) => {
       <div
         key={index}
         className={
-          data.username === user.name
-            ? styles.userMessage
-            : styles.otherMessage
+          data.username === user.name ? styles.userMessage : styles.otherMessage
         }
       >
         {data.message}
@@ -56,30 +53,31 @@ const Chatbox = ({ socket, roomId }) => {
     setIsAiMode(!isAiChat);
   };
 
-  const sendQuery = async function() {
+  const sendQuery = async function () {
     const msg = {
       message: q_message,
-      user: true
-    }
-    setQueries((curr => [...curr, msg]));
+      user: true,
+    };
+    setQueries((curr) => [...curr, msg]);
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: q_message })
+      body: JSON.stringify({ message: q_message }),
     };
     setQuery('');
     const response = await fetch('http://localhost:4444', requestOptions);
     const gpt_reply_parsed = await response.json();
     const gpt_reply = {
       message: gpt_reply_parsed.message,
-      user: false
-    }
-    setQueries((curr => [...curr, gpt_reply]));
+      user: false,
+    };
+    setQueries((curr) => [...curr, gpt_reply]);
   };
 
   const renderQuery = () => {
     return q_a_message.map((msg, index) => (
-      <div key={index}
+      <div
+        key={index}
         className={msg.user == true ? styles.userMessag : styles.otherMessage}
       >
         {msg.message}
@@ -116,57 +114,99 @@ const Chatbox = ({ socket, roomId }) => {
   return (
     <>
       <div className={styles['chat-box']}>
-        {isAiChat ? 
+        {isAiChat ? (
           <div className={styles['chat-box-header']}>
             Chat with GPT!
-            <span className={styles['chat-box-toggle']} onClick={() => setIsChatOpen(!isChatOpen)}>
-              <i className={styles.italicText}>{isChatOpen ? 'Close' : 'Open'}</i>
-            </span>
-          </div> :
-          <div className={styles['chat-box-header']}>
-            Chat with Peer!
-            <span className={styles['chat-box-toggle']} onClick={() => setIsChatOpen(!isChatOpen)}>
-              <i className={styles.italicText}>{isChatOpen ? 'Close' : 'Open'}</i>
+            <span
+              className={styles['chat-box-toggle']}
+              onClick={() => setIsChatOpen(!isChatOpen)}
+            >
+              <i className={styles.italicText}>
+                {isChatOpen ? 'Close' : 'Open'}
+              </i>
             </span>
           </div>
-        }
-        {(isChatOpen && isAiChat) ?
+        ) : (
+          <div className={styles['chat-box-header']}>
+            Chat with Peer!
+            <span
+              className={styles['chat-box-toggle']}
+              onClick={() => setIsChatOpen(!isChatOpen)}
+            >
+              <i className={styles.italicText}>
+                {isChatOpen ? 'Close' : 'Open'}
+              </i>
+            </span>
+          </div>
+        )}
+        {isChatOpen && isAiChat ? (
           <>
             <div className={styles['chat-box-body']}>
-              <div className={styles['chat-logs']}>
-               {renderQuery()}
+              <div className={styles['chat-logs']}>{renderQuery()}</div>
+            </div>
+            <div className={styles['chat-input']}>
+              <form
+                onSubmit={(q) => {
+                  q.preventDefault();
+                  sendQuery();
+                }}
+              >
+                <input
+                  type="text"
+                  id="chat-input"
+                  className={styles['chat-input']}
+                  placeholder="  Send a Query..."
+                  value={q_message}
+                  onChange={(q) => setQuery(q.target.value)}
+                />
+                <button
+                  type="submit"
+                  className={styles['chat-submit']}
+                  id="chat-submit"
+                >
+                  Submit
+                </button>
+              </form>
+            </div>
+            <button onClick={handleToggle}>CHAT</button>
+          </>
+        ) : (
+          isChatOpen && (
+            <>
+              <div className={styles['chat-box-body']}>
+                <div className={styles['chat-logs']}>{renderMessages()}</div>
               </div>
-            </div>
-            <div className={styles['chat-input']}>      
-              <form onSubmit={(q) => { q.preventDefault(); sendQuery(); }}>
-                <input type="text" id="chat-input" className={styles['chat-input']} placeholder="  Send a Query..." value={q_message} onChange={(q) => setQuery(q.target.value)} />
-                <button type="submit" className={styles['chat-submit']} id="chat-submit">Submit</button>
-              </form>      
-            </div>
-            <button onClick={handleToggle}>
-              CHAT
-            </button>
-          </>: isChatOpen && (<>
-            <div className={styles['chat-box-body']}>
-              <div className={styles['chat-logs']}>
-                {renderMessages()}
+              <div className={styles['chat-input']}>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    sendMessage();
+                  }}
+                >
+                  <input
+                    type="text"
+                    id="chat-input"
+                    className={styles['chat-input']}
+                    placeholder="  Send a message..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  />
+                  <button
+                    type="submit"
+                    className={styles['chat-submit']}
+                    id="chat-submit"
+                  >
+                    Send
+                  </button>
+                </form>
               </div>
-            </div>
-            <div className={styles['chat-input']}>      
-              <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
-                <input type="text" id="chat-input" className={styles['chat-input']} placeholder="  Send a message..." value={message} onChange={(e) => setMessage(e.target.value)} />
-                <button type="submit" className={styles['chat-submit']} id="chat-submit">Send</button>
-              </form>      
-            </div>
-            <button onClick={handleToggle}>
-              GPT
-            </button>
-          </>)
-        }
+              <button onClick={handleToggle}>GPT</button>
+            </>
+          )
+        )}
       </div>
     </>
   );
-
 };
 
 export default Chatbox;

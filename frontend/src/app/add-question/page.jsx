@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import QuestionForm from '@components/QuestionForm';
 import { createQuestion } from '@app/api/questionService';
+import MaintainerRoute from '@app/api/auth/[...nextauth]/MaintainerRoute';
+import axios from 'axios';
 
 const AddQuestion = () => {
   const router = useRouter();
@@ -21,7 +23,15 @@ const AddQuestion = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await createQuestion(post);
+      const res = await fetch('/api/add-question', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...post,
+        }),
+      });
       router.push('/');
     } catch (error) {
       console.log(error);
@@ -41,4 +51,4 @@ const AddQuestion = () => {
   );
 };
 
-export default AddQuestion;
+export default MaintainerRoute(AddQuestion);

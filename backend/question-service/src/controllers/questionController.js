@@ -1,4 +1,5 @@
 import Question from '../models/question.js';
+import jwt from 'jsonwebtoken';
 
 export const createQuestion = async (req, res) => {
   // console.log(req.body);

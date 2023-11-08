@@ -3,9 +3,8 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useSession } from 'next-auth/react';
-import Chatbox from './Chatbox';
 
-const socket = io.connect(process.env.NEXT_PUBLIC_MATCHING_SERVICE_URL);
+const socket = io(process.env.NEXT_PUBLIC_MATCHING_SERVICE_URL);
 
 const Matching = ({ onMatch }) => {
   const { data: session, status } = useSession();
@@ -215,7 +214,6 @@ const Matching = ({ onMatch }) => {
       {renderCountdownTimer()}
     </div>
   );
-
 };
 
 export default Matching;

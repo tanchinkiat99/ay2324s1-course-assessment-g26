@@ -312,7 +312,7 @@ setInterval(async () => {
   matchUsersInQueue('python', 'hard');
 }, 5000);
 
-server.listen(MATCHING_SERVER_PORT, () => {
+io.listen(MATCHING_SERVER_PORT, () => {
   console.log(
     `Matching server listening on port ${MATCHING_SERVER_PORT} with RabbitMQ running on: ${RABBITMQ_URL}`
   );

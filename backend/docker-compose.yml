@@ -19,6 +19,13 @@ services:
     ports:
       - '5555:5555'
 
+  ai-service:
+    build: ./ai-service
+    ports:
+      - '4444:4444'
+    env_file:
+      - ./ai-service/.env
+
   rabbitmq:
     image: 'rabbitmq:3.12-management'
     ports:

@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: myservice
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: myapp
+    type: front-end
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+spec:
+  replicas: 3
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: nginx
+      env: prod
+  template:
+    metadata:
+      labels:
+        app: nginx
+        env: prod
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 80
+          env:
+            - name: CITY
+              valueFrom:
+                configMapKeyRef:
+                  name: myapp-config
+                  key: city
+            - name: USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: myapp-secrets
+                  key: username
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: myapp-secrets
+                  key: password

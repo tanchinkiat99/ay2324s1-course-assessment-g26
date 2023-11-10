@@ -102,8 +102,6 @@ const ProfilePage = () => {
     return (
         <div className="flex flex-col items-center w-full h-screen p-8">
             <h1 className="text-4xl mb-6">Profile</h1>
-            <h2 className="text-2xl mb-6">Session</h2>
-            <h3 className="text-xl mb-6">{session?.user.name.toString()}</h3>
             <div className="flex flex-col items-center w-1/2">
                 <Image
                     className="rounded-full mb-4"
@@ -126,7 +124,7 @@ const ProfilePage = () => {
                     </>
                 ) : (
                     <>
-                        <p className="text-xl mb-4">{`Name: ${session?.user.name}`}</p>
+                        <p className="text-xl mb-4">{`${session?.user.name}`}</p>
                         <p className="text-xl mb-4">{`Email: ${session?.user.email}`}</p>
                     </>
                 )}

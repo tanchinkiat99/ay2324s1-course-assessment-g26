@@ -42,7 +42,7 @@ async function updateUserName(email, newName) {
 
 async function deleteUser(email) {
     const result = await pool.query("DELETE FROM clientuser WHERE email = $1", [email]);
-    return result.rowCount > 1;
+    return result.rowCount > 0;
 }
 
 export {

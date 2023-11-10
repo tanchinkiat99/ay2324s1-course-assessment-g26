@@ -56,8 +56,11 @@ router.post('/signin-new', body(['name', 'email']).notEmpty().escape(), body('im
     try {
         let user = await getUserCompleteByEmail(email);
         if (!user) {
-            const userRole = 'user'; // Set default user type created as user
-            user = await insertUser(email, name, image, userRole);
+            const USER_ROLE = 'user'; // Set default user type created as user
+            user = await insertUser(email, name, image, USER_ROLE);
+
+            return res.status(200).send({message: `New user ${email} successfully logged in by google`, name: name,
+                email: email, image: image, role_type: USER_ROLE});
         }
 
         res.status(200).send({message: `${user.email} successfully logged in by google`, name: user.name,

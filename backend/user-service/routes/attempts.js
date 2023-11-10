@@ -18,8 +18,8 @@ router.post('/:email', param('email').isEmail().escape(), body(['question_id', '
                 return res.status(400).json(validationRes.array()); // Return all error messages
             }
             const { email } = req.params;
-            const { question_id, question_title, code} = req.body;
-            const result = await addAttempt(email, question_id, question_title, code);
+            const { question_id, question_title, code } = req.body;
+            await addAttempt(email, question_id, question_title, code);
             res.status(200).json({message: `Attempt for question ${question_id} by ${email} created successfully`})
         } catch (error) {
             console.log(error);

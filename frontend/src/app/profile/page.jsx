@@ -7,7 +7,7 @@ import { deleteUser, updateUser} from '@app/api/userService';
 import { getAttemptHistory } from '@app/api/attemptsService';
 import { useRouter } from 'next/navigation';
 
-import Profile from '@components/Profile';
+import AttemptsList from "@components/AttemptsList";
 
 const ProfilePage = () => {
     const { data: session } = useSession();
@@ -22,7 +22,6 @@ const ProfilePage = () => {
     const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
     // States for attempt history feature
     const [attemptHistory, setAttemptHistory] = useState([]);
-    const [showAllAttempts, setShowAllAttempts] = useState(false);
     // States to control message dialogues (not in use)
     const [successMessage, setSuccessMessage] = useState(null);
     const [errorMessage, setErrorMessage] = useState(null);
@@ -98,11 +97,6 @@ const ProfilePage = () => {
         fetchAttemptHistory();
     }, [session?.user?.email]);
 
-    // Toggle the attempts view
-    const toggleAttemptsView = () => {
-        setShowAllAttempts(!showAllAttempts);
-    };
-
     return (
         <div className="flex flex-col items-center w-full h-screen p-8">
             <h1 className="text-4xl mb-6">Profile</h1>
@@ -141,33 +135,7 @@ const ProfilePage = () => {
             </div>
 
             {/* Table for attempt history */}
-            <div className="w-1/2 mt-8">
-                <h2 className="text-2xl mb-4">Attempt History</h2>
-                <table className="min-w-full">
-                    <thead>
-                    <tr>
-                        <th className="text-left p-2">Question Title</th>
-                        <th className="text-left p-2">Attempt Date</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {(showAllAttempts ? attemptHistory : attemptHistory.slice(0, 5)).map((attempt, index) => (
-                        <tr key={index}>
-                            <td className="p-2">{attempt.question_title}</td>
-                            <td className="p-2">{new Date(attempt.attempt_datetime).toLocaleString()}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-                {attemptHistory.length > 5 && (
-                    <button
-                        className="mt-4 px-3 py-1 text-white bg-blue-600 hover:bg-blue-700 rounded"
-                        onClick={toggleAttemptsView}
-                    >
-                        {showAllAttempts ? 'Show Less' : 'View More'}
-                    </button>
-                )}
-            </div>
+            <AttemptsList attemptHistory={attemptHistory} />
 
             {/* Delete profile text */}
             <span

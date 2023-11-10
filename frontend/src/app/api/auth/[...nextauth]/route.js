@@ -51,7 +51,7 @@ const handler = NextAuth({
         return false;
       }
     },
-    async jwt({ token, user, session }) {
+    async jwt({ token, user, trigger, session }) {
       // Only returns user on signin which will be copied to token, subsequent user here is undefined
       // console.log('jwt callback', { token, user, session });
       if (user) {
@@ -61,11 +61,22 @@ const handler = NextAuth({
           role_type: user.role_type,
         };
       }
-      return token;
+      if (trigger === "update" && session?.name) {
+        // https://next-auth.js.org/getting-started/client#updating-the-session
+        // When updating a user's information
+        token.name = session.name
+      }
+      return token
     },
-    async session({ session, token }) {
+    async session({ session, token, trigger, newSession }) {
       session.user.role_type = token.role_type;
       // console.log({ token, session });
+
+      if (trigger === "update" && newSession?.name) {
+        // https://next-auth.js.org/getting-started/client#updating-the-session
+        // Make sure the updated value is reflected on the client
+        session.name = newSession.name
+      }
 
       return session;
     },

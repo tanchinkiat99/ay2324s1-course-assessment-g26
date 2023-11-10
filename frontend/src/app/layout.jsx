@@ -11,7 +11,11 @@ const RootLayout = ({ children }) => {
   return (
     <html lang="en">
       <body>
-        <Provider>
+        <Provider session={children.session}
+            options={{
+              clientMaxAge: 60 // Re-fetch session if cache is older than 60 seconds
+            }}
+        >
           <main className="app">
             <Nav />
             {children}

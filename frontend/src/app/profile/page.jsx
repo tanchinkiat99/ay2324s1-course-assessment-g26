@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import {signOut, useSession} from 'next-auth/react';
+import { signOut, useSession} from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import PrivateRoute from '@app/api/auth/[...nextauth]/PrivateRoute';
 import { deleteUser, updateUser} from '@app/api/userService';
@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import AttemptsList from "@components/AttemptsList";
 
 const ProfilePage = () => {
-    let { data: session } = useSession();
+    let { data: session, update } = useSession();
     const router = useRouter();
     // States to control display of edit form
     const [editMode, setEditMode] = useState(false);
@@ -36,8 +36,8 @@ const ProfilePage = () => {
 
     const handleSubmit = async () => {
         try {
-            session.user.name = formData.name;
-            const res = await updateUser(formData.email, formData.name);
+            update({name: formData.name}); // Update user's name in the session
+            const res = await updateUser(formData.email, formData.name); // Update user's name in the database
             if (res.status === 200) {
                 setErrorMessage(null);
                 setSuccessMessage('Profile updated successfully');
@@ -102,6 +102,8 @@ const ProfilePage = () => {
     return (
         <div className="flex flex-col items-center w-full h-screen p-8">
             <h1 className="text-4xl mb-6">Profile</h1>
+            <h2 className="text-2xl mb-6">Session</h2>
+            <h3 className="text-xl mb-6">{session?.user.name.toString()}</h3>
             <div className="flex flex-col items-center w-1/2">
                 <Image
                     className="rounded-full mb-4"

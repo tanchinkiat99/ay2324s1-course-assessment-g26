@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-controller
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: peer-prep-group-26.com
+      http:
+        paths:
+          - path: /user
+            backend:
+              serviceName: user-service
+              servicePort: 3001
+          - path: /question
+            backend:
+              serviceName: question-service
+              servicePort: 5000

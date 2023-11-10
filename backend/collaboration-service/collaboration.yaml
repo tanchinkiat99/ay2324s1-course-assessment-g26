@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: collaboration-service
+spec:
+  ports:
+    - port: 5555
+      targetPort: 5555
+  selector:
+    app: collaboration
+    type: backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collaboration-deployment
+  labels:
+    app: collaboration
+    type: backend
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: collaboration
+      type: backend
+  template:
+    metadata:
+      labels:
+        app: collaboration
+        type: backend
+    spec:
+      containers:
+        - name: collaboration
+          image: repository/collaboration-service
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 5555

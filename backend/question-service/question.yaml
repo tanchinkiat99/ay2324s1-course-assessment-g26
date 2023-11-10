@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: question-service
+spec:
+  ports:
+    - port: 5000
+      targetPort: 5000
+  selector:
+    app: question
+    type: backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: question-deployment
+  labels:
+    app: question
+    type: backend
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: question
+      type: backend
+  template:
+    metadata:
+      labels:
+        app: question
+        type: backend
+    spec:
+      containers:
+        - name: question
+          image: repository/question-service
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          ports:
+            - containerPort: 5000
+          env:
+            - name: MONGODB_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: question-config
+                  key: mongodb-uri
+            - name: JWT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: question-config
+                  key: jwt-secret
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: question-config
+                  key: port

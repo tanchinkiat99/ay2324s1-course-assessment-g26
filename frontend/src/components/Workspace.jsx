@@ -12,7 +12,9 @@ const Workspace = ({ questionId, roomId, language }) => {
   );
   return (
     <div className="flex w-full h-screen">
-      <QuestionCard questionId={questionId} />
+      <div className="w-1/2">
+        <QuestionCard questionId={questionId} />
+      </div>
       <div className="w-1/2">
         <CodeEditor roomId={roomId} language={language}/>
       </div>

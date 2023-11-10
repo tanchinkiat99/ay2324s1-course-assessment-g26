@@ -43,14 +43,13 @@ const CollabPage = ({ params }) => {
             language={language}
           />
         )}
-        <Matching onMatch={onMatch} isMatched={isMatched}/>
+        <Matching onMatch={onMatch} isMatched={isMatched} />
         {isMatched && socket && roomId && (
           <Chatbox socket={socket} roomId={roomId} />
         )}
       </div>
     </div>
   );
-
 };
 
 export default CollabPage;

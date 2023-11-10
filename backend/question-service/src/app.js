@@ -5,8 +5,10 @@ import mongoose from 'mongoose';
 import questionRoutes from './routes/questionRoutes.js';
 import seedQuestions from './samples.js';
 import Question from './models/question.js';
+import { verifyRole } from './middlewares/verifyRole.js';
 
-dotenv.config({ path: '.env.local' });
+const envPath = process.env.NODE_ENV === 'development' ? '.env.local' : '.env';
+dotenv.config({ path: envPath });
 
 // console.log(process.env.MONGODB_URI);
 const app = express();
@@ -52,18 +54,5 @@ app.get('/', (_, res) => {
 });
 
 app.get;
-
-// // Set up a route for `/question/new` to return "hello world".
-// app.get('/question/new', (req, res) => {
-//   res.send('hello world');
-//   console.log('sent hello world');
-// });
-
-// // POST route to handle incoming data
-// app.post('/question/new', (req, res) => {
-//   console.log('POST request received at /question/new');
-//   console.log('Data received:', req.body);
-//   res.json({ status: 'success', data: req.body });
-// });
 
 export default app;

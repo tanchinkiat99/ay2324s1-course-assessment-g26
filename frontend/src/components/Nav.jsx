@@ -37,9 +37,12 @@ const Nav = () => {
             <Link href="/collab-page" className="outline_btn">
               Match with a Peer!
             </Link>
-            <Link href="/add-question" className="black_btn">
-              Create Question
-            </Link>
+            {session?.user.role_type === 'maintainer' && (
+              <Link href="/add-question" className="black_btn">
+                Create Question
+              </Link>
+            )}
+
             <button type="button" onClick={signOut} className="outline_btn">
               Sign Out
             </button>

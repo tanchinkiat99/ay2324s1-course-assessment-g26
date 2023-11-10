@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import AttemptsList from "@components/AttemptsList";
 
 const ProfilePage = () => {
-    const { data: session } = useSession();
+    let { data: session } = useSession();
     const router = useRouter();
     // States to control display of edit form
     const [editMode, setEditMode] = useState(false);
@@ -59,7 +59,10 @@ const ProfilePage = () => {
             const response = await deleteUser(session.user.email);
             console.log(response);
             signOut().then(() => {
-                router.push("/"); // Redirect to the index page
+                console.log("Redirecting...")
+                session = {};
+                // Redirect to the index page
+                router.push("/");
             });
         } catch (error) {
             // Handle any errors that occur during deletion
@@ -88,9 +91,8 @@ const ProfilePage = () => {
                     }
                 }
             } catch (error) {
-                // Handle error, e.g. set error message in state
                 console.error(error);
-                // Optionally set attemptHistory to an empty array if there's an error
+                // Set attemptHistory to an empty array if there's an error
                 setAttemptHistory([]);
             }
         };

@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: ai-config
 data:
-  openai-api-key: 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
+  openai-api-key:

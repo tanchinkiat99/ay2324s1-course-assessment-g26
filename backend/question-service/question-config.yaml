@@ -3,6 +3,6 @@ kind: ConfigMap
 metadata:
   name: question-config
 data:
-  mongodb-uri: mongodb+srv://dev:WPEY9DdgDOZdrGQH@cluster0.u7mjrgd.mongodb.net/?retryWrites=true&w=majority
-  jwt-secret: JNFF0iAryPKCwQMHou0w7X2obW077xMt/VZjGBcl5f8=
-  port: 5000
+  mongodb-uri:
+  jwt-secret:
+  port: '5000'

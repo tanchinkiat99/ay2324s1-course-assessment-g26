@@ -3,8 +3,8 @@ kind: ConfigMap
 metadata:
   name: user-config
 data:
-  db-host: 34.87.128.185
+  db-host: '34.87.128.185'
   db-user: postgres
-  db-password: 'pa$$word'
+  db-password:
   db-name: peer-prep
-  db-port: 5432
+  db-port: '5432'

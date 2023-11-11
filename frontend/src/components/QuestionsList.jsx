@@ -2,8 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getAllQuestions, deleteQuestion } from '@app/api/questionService';
-import jwt from 'jsonwebtoken';
 import axios from 'axios';
 
 const QuestionTable = ({
@@ -117,6 +115,7 @@ const QuestionsList = ({ role_type }) => {
   const [searchText, setSearchText] = useState('');
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
+  const [complexityFilter, setComplexityFilter] = useState('all');
 
   const [questions, setQuestions] = useState([]);
   const fetchQuestions = async () => {
@@ -145,14 +144,17 @@ const QuestionsList = ({ role_type }) => {
   // Search by title or category
   const filterQuestions = (searchText) => {
     const terms = searchText.split(/\s+/).filter((term) => term.length > 0);
-    return questions.filter((question) =>
-      terms.every((term) => {
-        const regex = new RegExp(term, 'i');
-        return (
-          regex.test(question.title) ||
-          question.categories.some((category) => regex.test(category))
-        );
-      })
+    return questions.filter(
+      (question) =>
+        (complexityFilter === 'all' ||
+          question.complexity === complexityFilter) &&
+        terms.every((term) => {
+          const regex = new RegExp(term, 'i');
+          return (
+            regex.test(question.title) ||
+            question.categories.some((category) => regex.test(category))
+          );
+        })
     );
   };
 
@@ -212,23 +214,45 @@ const QuestionsList = ({ role_type }) => {
           <button
             type="button"
             onClick={() => setSearchText('')}
-            className="absolute inset-y-0 right-0 px-4 text-gray-600 hover:text-gray-800"
+            className="absolute flex inset-y-0 right-0 mt-2 px-4 text-gray-600 hover:text-gray-800"
           >
             &#10005; {/* HTML entity for a cross (✖) */}
           </button>
         )}
+        <div className="flex items-center mt-5 mb-5">
+          {/* Radio buttons for complexity filter */}
+          {['all', 'Easy', 'Medium', 'Hard'].map((level) => (
+            <label key={level} className="inline-flex items-center mr-6">
+              <input
+                type="radio"
+                name="complexity"
+                value={level}
+                checked={complexityFilter === level}
+                onChange={(e) => setComplexityFilter(e.target.value)}
+                className="form-radio text-blue-600 h-4 w-4"
+              />
+              <span className="ml-2">
+                {level === 'all' ? 'All Complexities' : level}
+              </span>
+            </label>
+          ))}
+        </div>
       </form>
       {/* If search, show results*/}
       {searchText ? (
         <QuestionTable
-          questions={searchResults}
+          questions={filterQuestions(searchText)}
           handleCategoryClick={handleCategoryClick}
           handleDelete={handleDelete}
           role_type={role_type}
         />
       ) : (
         <QuestionTable
-          questions={questions}
+          questions={
+            complexityFilter === 'all'
+              ? questions
+              : questions.filter((q) => q.complexity === complexityFilter)
+          }
           handleCategoryClick={handleCategoryClick}
           handleDelete={handleDelete}
           role_type={role_type}

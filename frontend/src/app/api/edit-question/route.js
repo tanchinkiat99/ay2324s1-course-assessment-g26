@@ -11,7 +11,7 @@ export async function PATCH(req) {
   const encoded = jwt.sign({ role: token.role_type }, process.env.JWT_SECRET);
   const body = await req.json();
   // console.log(body);
-  const response = await axios.delete(
+  const response = await axios.patch(
     `${process.env.NEXT_PUBLIC_QUESTION_BACKEND_URL}/questions/${body.id}`,
     body,
     {

@@ -55,7 +55,7 @@ const QuestionTable = ({
               return (
                 <tr
                   className={`${idx % 2 == 1 ? 'bg-gray-100' : ''}`}
-                  key={question.id}
+                  key={idx}
                 >
                   <td className="px-6 py-3">
                     <Link
@@ -122,7 +122,13 @@ const QuestionsList = ({ role_type }) => {
   const fetchQuestions = async () => {
     try {
       const response = await axios.get('/api/questions');
-      setQuestions(response.data);
+      const difficultyOrder = { Easy: 1, Medium: 2, Hard: 3 };
+      setQuestions(
+        response.data.sort(
+          (a, b) =>
+            difficultyOrder[a.complexity] - difficultyOrder[b.complexity]
+        )
+      );
     } catch (error) {
       console.error('Error:', error);
       console.error('Error Details:', error.response?.data);
@@ -138,7 +144,7 @@ const QuestionsList = ({ role_type }) => {
 
   // Search by title or category
   const filterQuestions = (searchText) => {
-    const regex = new RegExp(searchText, 'i'); // case-insensitive regex
+    const regex = new RegExp(searchText.trim(), 'i'); // case-insensitive regex
     return questions.filter(
       (question) =>
         regex.test(question.title) ||
@@ -196,8 +202,17 @@ const QuestionsList = ({ role_type }) => {
           value={searchText}
           onChange={handleSearchChange}
           required
-          className="search_input peer mt-10"
+          className="search_input peer mt-10 pr-8"
         />
+        {searchText && (
+          <button
+            type="button"
+            onClick={() => setSearchText('')}
+            className="absolute inset-y-0 right-0 px-4 text-gray-600 hover:text-gray-800"
+          >
+            &#10005; {/* HTML entity for a cross (✖) */}
+          </button>
+        )}
       </form>
       {/* If search, show results*/}
       {searchText ? (

@@ -95,26 +95,56 @@ const QuestionTable = ({ questions, handleDelete, role_type }) => {
 };
 
 const QuestionsList = ({ role_type }) => {
-  // const [searchText, setSearchText] = useState('');
-  const [questions, setQuestions] = useState([]);
-  // const handleSearchChange = (e) => {};
+  // Search states
+  const [searchText, setSearchText] = useState('');
+  const [searchTimeout, setSearchTimeout] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
 
+  const [questions, setQuestions] = useState([]);
+  const fetchQuestions = async () => {
+    try {
+      const response = await axios.get('/api/questions');
+      setQuestions(response.data);
+    } catch (error) {
+      console.error('Error:', error);
+      console.error('Error Details:', error.response?.data);
+    }
+    // const data = await getAllQuestions();
+    // console.log(data);
+    // setQuestions(data);
+  };
   // Get all questions as soon as page loads
   useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const response = await axios.get('/api/questions');
-        setQuestions(response.data);
-      } catch (error) {
-        console.error('Error:', error);
-        console.error('Error Details:', error.response?.data);
-      }
-      // const data = await getAllQuestions();
-      // console.log(data);
-      // setQuestions(data);
-    };
     fetchQuestions();
   }, []);
+
+  // Search by title or category
+  const filterQuestions = (searchText) => {
+    const regex = new RegExp(searchText, 'i'); // case-insensitive regex
+    return questions.filter(
+      (question) =>
+        regex.test(question.title) ||
+        question.categories.some((category) => regex.test(category))
+    );
+  };
+
+  const handleSearchChange = (e) => {
+    clearTimeout(searchTimeout);
+    setSearchText(e.target.value);
+    // debounce
+    setSearchTimeout(
+      setTimeout(() => {
+        const results = filterQuestions(e.target.value);
+        setSearchResults(results);
+      }, 500)
+    );
+  };
+
+  const handleCategoryClick = (categoryName) => {
+    setSearchText(categoryName);
+    const results = filterQuestions(categoryName);
+    setSearchResults(results);
+  };
 
   const handleDelete = async (id) => {
     const confirmed = confirm('Are you sure you want to delete this question?');
@@ -141,21 +171,30 @@ const QuestionsList = ({ role_type }) => {
 
   return (
     <section className="feed">
-      {/* <form className="relative w-full flex-center">
+      <form className="relative w-full flex-center">
         <input
           type="text"
-          placeholder="Search question by title"
+          placeholder="Search question by title or category"
           value={searchText}
           onChange={handleSearchChange}
           required
           className="search_input peer mt-10"
         />
-      </form> */}
-      <QuestionTable
-        questions={questions}
-        handleDelete={handleDelete}
-        role_type={role_type}
-      />
+      </form>
+      {/* If search, show results*/}
+      {searchText ? (
+        <QuestionTable
+          questions={searchResults}
+          handleDelete={handleDelete}
+          role_type={role_type}
+        />
+      ) : (
+        <QuestionTable
+          questions={questions}
+          handleDelete={handleDelete}
+          role_type={role_type}
+        />
+      )}
     </section>
   );
 };

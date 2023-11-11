@@ -144,11 +144,15 @@ const QuestionsList = ({ role_type }) => {
 
   // Search by title or category
   const filterQuestions = (searchText) => {
-    const regex = new RegExp(searchText.trim(), 'i'); // case-insensitive regex
-    return questions.filter(
-      (question) =>
-        regex.test(question.title) ||
-        question.categories.some((category) => regex.test(category))
+    const terms = searchText.split(/\s+/).filter((term) => term.length > 0);
+    return questions.filter((question) =>
+      terms.every((term) => {
+        const regex = new RegExp(term, 'i');
+        return (
+          regex.test(question.title) ||
+          question.categories.some((category) => regex.test(category))
+        );
+      })
     );
   };
 

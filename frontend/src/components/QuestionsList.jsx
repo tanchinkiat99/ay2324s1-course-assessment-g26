@@ -6,7 +6,12 @@ import { getAllQuestions, deleteQuestion } from '@app/api/questionService';
 import jwt from 'jsonwebtoken';
 import axios from 'axios';
 
-const QuestionTable = ({ questions, handleDelete, role_type }) => {
+const QuestionTable = ({
+  questions,
+  handleCategoryClick,
+  handleDelete,
+  role_type,
+}) => {
   const router = useRouter();
 
   const handleEdit = (id) => {
@@ -64,8 +69,21 @@ const QuestionTable = ({ questions, handleDelete, role_type }) => {
                     <p className={`${colour}`}>{question.complexity}</p>
                   </td>
                   <td className="px-6 py-3">
-                    {question.categories.join(', ')}
+                    {question.categories
+                      .slice()
+                      .sort()
+                      .map((category, index) => (
+                        <span
+                          key={index}
+                          className="hover:text-blue-600 cursor-pointer"
+                          onClick={() => handleCategoryClick(category)}
+                        >
+                          {category}
+                          {index < question.categories.length - 1 ? ', ' : ''}
+                        </span>
+                      ))}
                   </td>
+
                   {role_type == 'maintainer' && (
                     <td className="px-6 py-3">
                       <div className="flex space-x-4">
@@ -185,12 +203,14 @@ const QuestionsList = ({ role_type }) => {
       {searchText ? (
         <QuestionTable
           questions={searchResults}
+          handleCategoryClick={handleCategoryClick}
           handleDelete={handleDelete}
           role_type={role_type}
         />
       ) : (
         <QuestionTable
           questions={questions}
+          handleCategoryClick={handleCategoryClick}
           handleDelete={handleDelete}
           role_type={role_type}
         />

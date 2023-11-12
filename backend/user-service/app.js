@@ -1,11 +1,13 @@
 // user-service/backend/app.js
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import authRoute from './routes/auth.js';
 import userRoute from './routes/user.js';
 import attemptsRoute from './routes/attempts.js'
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 

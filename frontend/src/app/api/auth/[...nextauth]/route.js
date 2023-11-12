@@ -1,6 +1,6 @@
 //frontend/src/app/api/auth/[...nextauth]/route.js
 import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/Google';
+import GoogleProvider from 'next-auth/providers/google';
 import axios from 'axios';
 
 const handler = NextAuth({
@@ -34,13 +34,16 @@ const handler = NextAuth({
       };
 
       try {
-        const res = await axios.post(`${process.env.EXPRESS_SERVER}/auth/signin-new`,
-            {
-              name: user_.name,
-              email: user_.email,
-              image: user_.image
-            });
-        if (res.status === 200) { // Successful request
+        const res = await axios.post(
+          `${process.env.EXPRESS_SERVER}/auth/signin-new`,
+          {
+            name: user_.name,
+            email: user_.email,
+            image: user_.image,
+          }
+        );
+        if (res.status === 200) {
+          // Successful request
           user.name = res.data.name;
           user.image = res.data.image;
           user.role_type = res.data.role_type;
@@ -61,21 +64,21 @@ const handler = NextAuth({
           role_type: user.role_type,
         };
       }
-      if (trigger === "update" && session?.name) {
+      if (trigger === 'update' && session?.name) {
         // https://next-auth.js.org/getting-started/client#updating-the-session
         // When updating a user's information
-        token.name = session.name
+        token.name = session.name;
       }
-      return token
+      return token;
     },
     async session({ session, token, trigger, newSession }) {
       session.user.role_type = token.role_type;
       // console.log({ token, session });
 
-      if (trigger === "update" && newSession?.name) {
+      if (trigger === 'update' && newSession?.name) {
         // https://next-auth.js.org/getting-started/client#updating-the-session
         // Make sure the updated value is reflected on the client
-        session.name = newSession.name
+        session.name = newSession.name;
       }
 
       return session;

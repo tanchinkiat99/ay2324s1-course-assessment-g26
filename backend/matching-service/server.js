@@ -14,7 +14,9 @@ dotenv.config({ path: '.env.local' });
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
-
+app.get('/', (_, res) => {
+  res.send('MATCHING SERVICE IS RUNNING');
+});
 // env variables
 const MATCHING_SERVER_PORT = process.env.MATCHING_SERVER_PORT || 5001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -24,7 +26,7 @@ const QUESTION_SERVICE_ENDPOINT = `${QUESTION_SERVICE_URL}/questions`;
 
 const io = socketIO(server, {
   cors: {
-    origin: FRONTEND_URL,
+    origin: ['*'],
     methods: ['GET', 'POST'],
   },
 });

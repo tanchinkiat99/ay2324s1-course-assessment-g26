@@ -14,7 +14,10 @@ server.on('upgrade', (request, socket, head) => {
 
 const port = 5555;
 
-server.listen(port, () => 
-    console.log(`Server started on http://localhost:${port}/`)
-);
+app.get('/', (_, res) => {
+  res.send('COLLABORATION SERVICE IS RUNNING');
+});
 
+server.listen(port, () =>
+  console.log(`Server started on http://localhost:${port}/`)
+);

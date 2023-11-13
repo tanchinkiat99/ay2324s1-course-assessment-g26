@@ -65,7 +65,10 @@ const Chatbox = ({ socket, roomId }) => {
       body: JSON.stringify({ message: q_message }),
     };
     setQuery('');
-    const response = await fetch('http://localhost:4444', requestOptions);
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_AI_SERVICE_URL,
+      requestOptions
+    );
     const gpt_reply_parsed = await response.json();
     const gpt_reply = {
       message: gpt_reply_parsed.message,

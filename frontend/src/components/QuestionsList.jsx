@@ -2,11 +2,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getAllQuestions, deleteQuestion } from '@app/api/questionService';
-import jwt from 'jsonwebtoken';
 import axios from 'axios';
 
-const QuestionTable = ({ questions, handleDelete, role_type }) => {
+const QuestionTable = ({
+  questions,
+  handleCategoryClick,
+  handleDelete,
+  role_type,
+}) => {
   const router = useRouter();
 
   const handleEdit = (id) => {
@@ -50,7 +53,7 @@ const QuestionTable = ({ questions, handleDelete, role_type }) => {
               return (
                 <tr
                   className={`${idx % 2 == 1 ? 'bg-gray-100' : ''}`}
-                  key={question.id}
+                  key={idx}
                 >
                   <td className="px-6 py-3">
                     <Link
@@ -64,8 +67,21 @@ const QuestionTable = ({ questions, handleDelete, role_type }) => {
                     <p className={`${colour}`}>{question.complexity}</p>
                   </td>
                   <td className="px-6 py-3">
-                    {question.categories.join(', ')}
+                    {question.categories
+                      .slice()
+                      .sort()
+                      .map((category, index) => (
+                        <span
+                          key={index}
+                          className="hover:text-blue-600 cursor-pointer"
+                          onClick={() => handleCategoryClick(category)}
+                        >
+                          {category}
+                          {index < question.categories.length - 1 ? ', ' : ''}
+                        </span>
+                      ))}
                   </td>
+
                   {role_type == 'maintainer' && (
                     <td className="px-6 py-3">
                       <div className="flex space-x-4">
@@ -95,26 +111,70 @@ const QuestionTable = ({ questions, handleDelete, role_type }) => {
 };
 
 const QuestionsList = ({ role_type }) => {
-  // const [searchText, setSearchText] = useState('');
-  const [questions, setQuestions] = useState([]);
-  // const handleSearchChange = (e) => {};
+  // Search states
+  const [searchText, setSearchText] = useState('');
+  const [searchTimeout, setSearchTimeout] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [complexityFilter, setComplexityFilter] = useState('all');
 
+  const [questions, setQuestions] = useState([]);
+  const fetchQuestions = async () => {
+    try {
+      const response = await axios.get('/api/questions');
+      const difficultyOrder = { Easy: 1, Medium: 2, Hard: 3 };
+      setQuestions(
+        response.data.sort(
+          (a, b) =>
+            difficultyOrder[a.complexity] - difficultyOrder[b.complexity]
+        )
+      );
+    } catch (error) {
+      console.error('Error:', error);
+      console.error('Error Details:', error.response?.data);
+    }
+    // const data = await getAllQuestions();
+    // console.log(data);
+    // setQuestions(data);
+  };
   // Get all questions as soon as page loads
   useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const response = await axios.get('/api/questions');
-        setQuestions(response.data);
-      } catch (error) {
-        console.error('Error:', error);
-        console.error('Error Details:', error.response?.data);
-      }
-      // const data = await getAllQuestions();
-      // console.log(data);
-      // setQuestions(data);
-    };
     fetchQuestions();
   }, []);
+
+  // Search by title or category
+  const filterQuestions = (searchText) => {
+    const terms = searchText.split(/\s+/).filter((term) => term.length > 0);
+    return questions.filter(
+      (question) =>
+        (complexityFilter === 'all' ||
+          question.complexity === complexityFilter) &&
+        terms.every((term) => {
+          const regex = new RegExp(term, 'i');
+          return (
+            regex.test(question.title) ||
+            question.categories.some((category) => regex.test(category))
+          );
+        })
+    );
+  };
+
+  const handleSearchChange = (e) => {
+    clearTimeout(searchTimeout);
+    setSearchText(e.target.value);
+    // debounce
+    setSearchTimeout(
+      setTimeout(() => {
+        const results = filterQuestions(e.target.value);
+        setSearchResults(results);
+      }, 500)
+    );
+  };
+
+  const handleCategoryClick = (categoryName) => {
+    setSearchText(categoryName);
+    const results = filterQuestions(categoryName);
+    setSearchResults(results);
+  };
 
   const handleDelete = async (id) => {
     const confirmed = confirm('Are you sure you want to delete this question?');
@@ -141,21 +201,63 @@ const QuestionsList = ({ role_type }) => {
 
   return (
     <section className="feed">
-      {/* <form className="relative w-full flex-center">
+      <form className="relative w-full flex-center">
         <input
           type="text"
-          placeholder="Search question by title"
+          placeholder="Search question by title or category"
           value={searchText}
           onChange={handleSearchChange}
           required
-          className="search_input peer mt-10"
+          className="search_input peer mt-10 pr-8"
         />
-      </form> */}
-      <QuestionTable
-        questions={questions}
-        handleDelete={handleDelete}
-        role_type={role_type}
-      />
+        {searchText && (
+          <button
+            type="button"
+            onClick={() => setSearchText('')}
+            className="absolute flex inset-y-0 right-0 mt-2 px-4 text-gray-600 hover:text-gray-800"
+          >
+            &#10005; {/* HTML entity for a cross (✖) */}
+          </button>
+        )}
+        <div className="flex items-center mt-5 mb-5">
+          {/* Radio buttons for complexity filter */}
+          {['all', 'Easy', 'Medium', 'Hard'].map((level) => (
+            <label key={level} className="inline-flex items-center mr-6">
+              <input
+                type="radio"
+                name="complexity"
+                value={level}
+                checked={complexityFilter === level}
+                onChange={(e) => setComplexityFilter(e.target.value)}
+                className="form-radio text-blue-600 h-4 w-4"
+              />
+              <span className="ml-2">
+                {level === 'all' ? 'All Complexities' : level}
+              </span>
+            </label>
+          ))}
+        </div>
+      </form>
+      {/* If search, show results*/}
+      {searchText ? (
+        <QuestionTable
+          questions={filterQuestions(searchText)}
+          handleCategoryClick={handleCategoryClick}
+          handleDelete={handleDelete}
+          role_type={role_type}
+        />
+      ) : (
+        <QuestionTable
+          questions={
+            complexityFilter === 'all'
+              ? questions
+              : questions.filter((q) => q.complexity === complexityFilter)
+          }
+          handleCategoryClick={handleCategoryClick}
+          handleDelete={handleDelete}
+          role_type={role_type}
+        />
+      )}
     </section>
   );
 };

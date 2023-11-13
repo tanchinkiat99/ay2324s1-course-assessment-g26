@@ -29,6 +29,6 @@ services:
   ai-service:
     build: ./ai-service
     ports:
-      - '5001:5001'
+      - '4444:4444'
     env_file:
       - ./ai-service/.env.local

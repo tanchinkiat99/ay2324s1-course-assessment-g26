@@ -176,11 +176,13 @@ io.on('connection', (socket) => {
       // cancelConsumer(consumer);
       // isMatched || socket.disconnect();
       clearInterval(checker);
+      removeFromQueues(socket.id);
       isMatched[0] || socket.disconnect();
     }, 30000);
 
     socket.on('disconnect', () => {
       // cancelConsumer(consumer);
+      removeFromQueues(socket.id);
     });
   });
 
@@ -212,6 +214,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    removeFromQueues(socket.id);
     socket.disconnect();
   });
 });
@@ -404,6 +407,20 @@ function checkNotifications(socket, data) {
     return true;
   } else {
     return false;
+  }
+}
+
+function removeFromQueues(socketId) {
+  for (let queueKey in QUEUES) {
+    if (queueKey === NOTIFICATION_QUEUE) {
+      QUEUES[queueKey] = QUEUES[queueKey].filter((notification) => {
+        return notification.user_socket_id != socketId;
+      });
+    } else {
+      QUEUES[queueKey] = QUEUES[queueKey].filter((matchReq) => {
+        return matchReq.socket_id != socketId;
+      });
+    }
   }
 }
 

@@ -26,7 +26,7 @@ const QUESTION_SERVICE_ENDPOINT = `${QUESTION_SERVICE_URL}/questions`;
 
 const io = socketIO(server, {
   cors: {
-    origin: ['*'],
+    origin: ['*:*'],
     methods: ['GET', 'POST'],
   },
 });
